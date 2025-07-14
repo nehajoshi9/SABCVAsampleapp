@@ -1,0 +1,14 @@
+Card {
+    Row {
+        SquareImage()
+        Column {
+            Title()
+            Location()
+            Tagline()
+            Row {
+                Tag()
+                Tag()
+            }
+        }
+    }
+}
