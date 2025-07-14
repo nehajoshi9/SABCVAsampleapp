@@ -1,4 +1,4 @@
-package com.example.sabcvasampleapp.ui.theme
+package com.sabcva.app.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
