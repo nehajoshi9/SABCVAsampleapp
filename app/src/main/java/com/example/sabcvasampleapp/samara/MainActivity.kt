@@ -8,7 +8,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.activity.viewModels
-import com.example.sabcva_app.screens.announcement.CreateAnnouncementScreen
+import com.example.sabcvasampleapp.samara.screens.CreateAnnouncementScreen
 import com.example.sabcva_app.screens.login.LoginScreen
 import com.example.sabcva_app.screens.login.VerifyOtpScreen
 import com.example.sabcva_app.screens.search.SearchResultsScreen
