@@ -13,6 +13,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Campaign
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.IosShare
@@ -30,6 +31,7 @@ import androidx.navigation.NavController
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.withStyle
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CreatePostScreen(
     navController: NavController,
@@ -62,33 +64,22 @@ fun CreatePostScreen(
             .padding(0.dp)
     ) {
         // 🔴 Header
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(Color(0xFFD32F2F))
-                .padding(horizontal = 24.dp, vertical = 20.dp)
-        ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(
-                    imageVector = Icons.Filled.Campaign,
-                    contentDescription = "Megaphone",
-                    tint = Color.White,
-                    modifier = Modifier.size(28.dp)
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(
-                    text = "Create Post",
-                    fontSize = 22.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.White
-                )
-            }
-        }
+        TopAppBar(
+            title = {
+                Text("Create Post", color = Color.White, fontWeight = FontWeight.SemiBold)
+            },
+            navigationIcon = {
+                IconButton(onClick = { navController.popBackStack() }) {
+                    Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = Color.White)
+                }
+            },
+            colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = Color(0xFFB00020))
+        )
 
         // Subtitle
         Text(
             text = "Share something with your network!",
-            fontSize = 14.sp,
+            fontSize = 16.sp,
             modifier = Modifier.padding(horizontal = 24.dp, vertical = 12.dp)
         )
 
@@ -174,7 +165,7 @@ fun CreatePostScreen(
                 Button(
                     onClick = { onPublish(title, description, selectedFileUri) },
                     modifier = Modifier.weight(1f),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFD32F2F))
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFB00020))
                 ) {
                     Text("Publish", color = Color.White)
                 }
