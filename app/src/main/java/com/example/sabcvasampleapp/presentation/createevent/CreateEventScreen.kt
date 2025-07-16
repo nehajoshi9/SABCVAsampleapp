@@ -145,7 +145,7 @@ fun CreateEventScreen(navController: NavController) {
                 .padding(paddingValues)
                 .padding(horizontal = 20.dp, vertical = 16.dp)
         ) {
-            TextFieldSection(true, "Event Title", eventTitle, { eventTitle = it }, "Give your event a name")
+            TextFieldSection(true, "Event Title", eventTitle, { eventTitle = it }, "Give your event a name", allowTyping = true)
 
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -153,7 +153,7 @@ fun CreateEventScreen(navController: NavController) {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            TextFieldSection(true, "Date", eventDate, {}, "MM/DD/YYYY", isReadOnly = true, onClick = {
+            TextFieldSection(true, "Date", eventDate, {}, "MM/DD/YYYY", allowTyping = false, onClick = {
                 DatePickerDialog(context, { _, y, m, d ->
                     eventDate = String.format("%02d/%02d/%04d", m + 1, d, y)
                 }, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH)).show()
@@ -162,7 +162,7 @@ fun CreateEventScreen(navController: NavController) {
             Spacer(modifier = Modifier.height(16.dp))
 
             AccordionCard(true, true,"Event Duration", Icons.Default.AccessTime) {
-                TextFieldSection(true, "Start Time", startTime, {}, "HH:MM", isReadOnly = true, onClick = {
+                TextFieldSection(true, "Start Time", startTime, {}, "HH:MM", allowTyping = false, onClick = {
                     TimePickerDialog(context, { _, h, m ->
                         startTime = String.format("%02d:%02d", h, m)
                     }, calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE), false).show()
@@ -170,7 +170,7 @@ fun CreateEventScreen(navController: NavController) {
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                TextFieldSection(true, "End Time", endTime, {}, "HH:MM", isReadOnly = true, onClick = {
+                TextFieldSection(true, "End Time", endTime, {}, "HH:MM", allowTyping = false, onClick = {
                     TimePickerDialog(context, { _, h, m ->
                         endTime = String.format("%02d:%02d", h, m)
                     }, calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE), false).show()
@@ -191,14 +191,6 @@ fun CreateEventScreen(navController: NavController) {
             val locationSuggestions = allAddresses.filter {
                 it.contains(locationQuery, ignoreCase = true)
             }
-
-            /*Text(
-                text = "Location",
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Medium,
-                color = Color(0xFF374151)
-            )
-            Spacer(modifier = Modifier.height(4.dp))*/
 
             var showDropdown by remember { mutableStateOf(false) }
             TextFieldSection(
@@ -436,7 +428,7 @@ fun TextFieldSection(
     onValueChange: (String) -> Unit,
     placeholder: String,
     isMultiline: Boolean = false,
-    isReadOnly: Boolean = false,
+    allowTyping: Boolean = true,
     onClick: (() -> Unit)? = null
 ) {
         Text(
@@ -454,6 +446,37 @@ fun TextFieldSection(
         Spacer(modifier = Modifier.height(4.dp))
 
 
+    if (!allowTyping) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(if (isMultiline) 120.dp else 56.dp)
+                .clip(RoundedCornerShape(12.dp))
+                .background(Color(0xFFF2F2F2))
+                .clickable(enabled = onClick != null) { onClick?.invoke() } // ✅ ensures click works
+        ) {
+            OutlinedTextField(
+                value = value,
+                onValueChange = onValueChange,
+                placeholder = { Text(placeholder, fontSize = 16.sp) },
+                modifier = Modifier
+                    .fillMaxSize(),
+                textStyle = LocalTextStyle.current.copy(fontSize = 16.sp),
+                shape = RoundedCornerShape(12.dp),
+                readOnly = true, // ✅ force readOnly to prevent keyboard
+                enabled = false, // ✅ visually disabled (optional)
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = Color.Transparent,
+                    unfocusedBorderColor = Color.Transparent,
+                    disabledBorderColor = Color.Transparent,
+                    disabledContainerColor = Color(0xFFF2F2F2),
+                    disabledTextColor = Color.Black,
+                    disabledLabelColor = Color.Gray,
+                    disabledPlaceholderColor = Color.Gray
+                )
+            )
+        }
+    } else {
     OutlinedTextField(
         value = value,
         textStyle = LocalTextStyle.current.copy(fontSize = 16.sp),
@@ -465,14 +488,14 @@ fun TextFieldSection(
             .clip(RoundedCornerShape(12.dp))
             .clickable(enabled = onClick != null) { onClick?.invoke() },
         shape = RoundedCornerShape(12.dp),
-        readOnly = isReadOnly,
+        readOnly = false,
         colors = OutlinedTextFieldDefaults.colors(
             focusedBorderColor = Color.Transparent,
             unfocusedBorderColor = Color.Transparent,
             focusedContainerColor = Color(0xFFF2F2F2),
             unfocusedContainerColor = Color(0xFFF2F2F2)
         )
-    )
+    ) }
 }
 
 @Composable
