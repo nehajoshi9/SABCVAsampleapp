@@ -15,7 +15,7 @@ import com.example.sabcvasampleapp.presentation.calendar.CalendarScreen
 import com.example.sabcvasampleapp.presentation.eventpage.EventScreen
 import com.example.sabcvasampleapp.presentation.createevent.CreateEventScreen
 import com.example.sabcvasampleapp.ui.theme.SABCVASampleAppTheme
-import com.example.sabcvasampleapp.presentation.CreatePostScreen
+import com.example.sabcvasampleapp.presentation.createpost.CreatePostScreen
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
