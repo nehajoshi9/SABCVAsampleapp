@@ -12,6 +12,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import com.example.sabcvasampleapp.presentation.data.EventRepository
 import androidx.compose.foundation.relocation.BringIntoViewRequester
 import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.foundation.rememberScrollState
@@ -73,27 +74,17 @@ fun CreateEventScreen(navController: NavController, viewModel: CreateEventViewMo
         }
     )
 
-    val allAddresses = listOf(
-        "123 Main St, New York, NY",
-        "456 Maple Ave, Los Angeles, CA",
-        "789 Oak Blvd, Chicago, IL",
-        "1600 Pennsylvania Ave NW, Washington, DC",
-        "1 Infinite Loop, Cupertino, CA"
-    )
-    val allProfiles = listOf("Alice Johnson", "Bob Smith", "Carmen Reyes", "David Chen",
-        "Eva Patel", "Google", "Facebook", "Amazon", "Microsoft")
-
     var locationQuery by remember { mutableStateOf(eventLocation) }
     var coHostQuery by remember { mutableStateOf("") }
     var sponsorQuery by remember { mutableStateOf("") }
 
-    val locationSuggestions = allAddresses.filter {
+    val locationSuggestions = EventRepository.allAddresses.filter {
         it.contains(locationQuery, ignoreCase = true)
     }
-    val cohostSuggestions = allProfiles.filter {
+    val cohostSuggestions = EventRepository.allProfiles.filter {
         it.contains(coHostQuery, ignoreCase = true) && !invitedCoHosts.contains(it)
     }
-    val sponsorSuggestions = allProfiles.filter {
+    val sponsorSuggestions = EventRepository.allBusinessProfiles.filter {
         it.contains(sponsorQuery, ignoreCase = true) && !invitedSponsors.contains(it)
     }
 

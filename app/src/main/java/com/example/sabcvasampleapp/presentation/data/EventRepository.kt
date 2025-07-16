@@ -30,9 +30,19 @@ object EventRepository {
         )
     )
 
-    private val allPersonProfiles = mutableListOf<String>("Eva Patel", "")
+    private val allPersonProfiles = mutableListOf<String>("Alice Johnson", "Bob Smith", "Carmen Reyes", "David Chen",
+        "Eva Patel")
 
+    val allBusinessProfiles = mutableListOf<String>("Google", "Facebook", "Amazon", "Microsoft")
 
+    val allAddresses = listOf(
+        "123 Main St, New York, NY",
+        "456 Maple Ave, Los Angeles, CA",
+        "789 Oak Blvd, Chicago, IL",
+        "1600 Pennsylvania Ave NW, Washington, DC",
+        "1 Infinite Loop, Cupertino, CA"
+    )
+    val allProfiles = allPersonProfiles + allBusinessProfiles
 
     fun getAllEvents(): List<EventDetails> = allEvents.toList()
 
