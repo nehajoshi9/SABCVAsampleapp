@@ -1,9 +1,9 @@
-
 package com.example.sabcvasampleapp.presentation.createevent
 
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
 import android.content.Intent
+import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
@@ -11,8 +11,9 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.relocation.BringIntoViewRequester
+import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -23,59 +24,84 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.compose.foundation.relocation.BringIntoViewRequester
-import androidx.compose.foundation.relocation.bringIntoViewRequester
-import androidx.compose.foundation.layout.FlowRow
-import kotlinx.coroutines.launch
-import androidx.navigation.NavController
-import java.util.*
-import android.net.Uri
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
+import kotlinx.coroutines.launch
+import java.util.*
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class, ExperimentalFoundationApi::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class,
+    ExperimentalLayoutApi::class
+)
 @Composable
-fun CreateEventScreen(navController: NavController) {
+fun CreateEventScreen(navController: NavController, viewModel: CreateEventViewModel = viewModel()) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
-    val bringIntoViewRequester = remember { BringIntoViewRequester() }
-    var invitedCoHosts by remember { mutableStateOf(listOf<String>()) }
-    var eventTitle by remember { mutableStateOf("") }
-    var eventDate by remember { mutableStateOf("") }
-    var startTime by remember { mutableStateOf("") }
-    var endTime by remember { mutableStateOf("") }
-    var eventLocation by remember { mutableStateOf("") }
-    var eventDescription by remember { mutableStateOf("") }
     val scrollState = rememberScrollState()
-    var selectedFileUri by remember { mutableStateOf<Uri?>(null) }
-    var requiredFilled by remember { mutableStateOf(false) }
-    var showDialog by remember { mutableStateOf(false) }
-    requiredFilled = eventTitle.isNotBlank() && eventDate.isNotBlank() && eventLocation.isNotBlank() && eventDescription.isNotBlank() && startTime.isNotBlank() && endTime.isNotBlank() && invitedCoHosts.isNotEmpty()
+    val calendar = Calendar.getInstance()
 
-// 🧩 File Picker Launcher
+    val eventTitle by viewModel.title.collectAsState()
+    val eventDescription by viewModel.description.collectAsState()
+    val eventDate by viewModel.date.collectAsState()
+    val startTime by viewModel.startTime.collectAsState()
+    val endTime by viewModel.endTime.collectAsState()
+    val eventLocation by viewModel.location.collectAsState()
+    val invitedCoHosts by viewModel.cohosts.collectAsState()
+    val invitedSponsors by viewModel.sponsors.collectAsState()
+    val selectedFileUri by viewModel.fileUri.collectAsState()
+    val showDialog by viewModel.showDialog.collectAsState()
+
     val filePickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.OpenDocument(),
         onResult = { uri ->
-            if (uri != null) {
-                selectedFileUri = uri
+            uri?.let {
+                viewModel.setFile(uri)
                 context.contentResolver.takePersistableUriPermission(
-                    uri,
-                    Intent.FLAG_GRANT_READ_URI_PERMISSION
+                    uri, Intent.FLAG_GRANT_READ_URI_PERMISSION
                 )
             }
         }
     )
-    val calendar = Calendar.getInstance()
+
+    val allAddresses = listOf(
+        "123 Main St, New York, NY",
+        "456 Maple Ave, Los Angeles, CA",
+        "789 Oak Blvd, Chicago, IL",
+        "1600 Pennsylvania Ave NW, Washington, DC",
+        "1 Infinite Loop, Cupertino, CA"
+    )
+    val allProfiles = listOf("Alice Johnson", "Bob Smith", "Carmen Reyes", "David Chen",
+        "Eva Patel", "Google", "Facebook", "Amazon", "Microsoft")
+
+    var locationQuery by remember { mutableStateOf(eventLocation) }
+    var coHostQuery by remember { mutableStateOf("") }
+    var sponsorQuery by remember { mutableStateOf("") }
+
+    val locationSuggestions = allAddresses.filter {
+        it.contains(locationQuery, ignoreCase = true)
+    }
+    val cohostSuggestions = allProfiles.filter {
+        it.contains(coHostQuery, ignoreCase = true) && !invitedCoHosts.contains(it)
+    }
+    val sponsorSuggestions = allProfiles.filter {
+        it.contains(sponsorQuery, ignoreCase = true) && !invitedSponsors.contains(it)
+    }
+
+    var showDropdown by remember { mutableStateOf(false) }
 
     if (showDialog) {
         BasicAlertDialog(
-            onDismissRequest = { showDialog = false },
+            onDismissRequest = { viewModel.resetValidationDialog() },
             content = {
                 Surface(
                     shape = RoundedCornerShape(12.dp),
@@ -91,7 +117,7 @@ fun CreateEventScreen(navController: NavController) {
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.End
                         ) {
-                            TextButton(onClick = { showDialog = false }) {
+                            TextButton(onClick = { viewModel.resetValidationDialog() }) {
                                 Text("Ok")
                             }
                         }
@@ -100,7 +126,6 @@ fun CreateEventScreen(navController: NavController) {
             }
         )
     }
-
 
     Scaffold(
         topBar = {
@@ -116,11 +141,11 @@ fun CreateEventScreen(navController: NavController) {
                 actions = {
                     Button(
                         onClick = {
-                            if(!requiredFilled) {
-                                showDialog = true
+                            viewModel.triggerValidationDialog()
+                            if (viewModel.isValid()) {
+                                // Publish
                             }
-
-                        /* Publish */ },
+                        },
                         colors = ButtonDefaults.buttonColors(
                             containerColor = Color.White,
                             contentColor = Color(0xFFB00020)
@@ -145,26 +170,26 @@ fun CreateEventScreen(navController: NavController) {
                 .padding(paddingValues)
                 .padding(horizontal = 20.dp, vertical = 16.dp)
         ) {
-            TextFieldSection(true, "Event Title", eventTitle, { eventTitle = it }, "Give your event a name", allowTyping = true)
+            TextFieldSection(true, "Event Title", eventTitle, viewModel::updateTitle, "Give your event a name")
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            TextFieldSection(true,"Description", eventDescription, { eventDescription = it }, "Tell people what your event is about", isMultiline = true)
+            TextFieldSection(true, "Description", eventDescription, viewModel::updateDescription, "Tell people what your event is about", isMultiline = true)
 
             Spacer(modifier = Modifier.height(16.dp))
 
             TextFieldSection(true, "Date", eventDate, {}, "MM/DD/YYYY", allowTyping = false, onClick = {
                 DatePickerDialog(context, { _, y, m, d ->
-                    eventDate = String.format("%02d/%02d/%04d", m + 1, d, y)
+                    viewModel.updateDate(String.format("%02d/%02d/%04d", m + 1, d, y))
                 }, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH)).show()
             })
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            AccordionCard(true, true,"Event Duration", Icons.Default.AccessTime) {
+            AccordionCard(true, true, "Event Duration", Icons.Default.AccessTime) {
                 TextFieldSection(true, "Start Time", startTime, {}, "HH:MM", allowTyping = false, onClick = {
                     TimePickerDialog(context, { _, h, m ->
-                        startTime = String.format("%02d:%02d", h, m)
+                        viewModel.updateStartTime(String.format("%02d:%02d", h, m))
                     }, calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE), false).show()
                 })
 
@@ -172,27 +197,13 @@ fun CreateEventScreen(navController: NavController) {
 
                 TextFieldSection(true, "End Time", endTime, {}, "HH:MM", allowTyping = false, onClick = {
                     TimePickerDialog(context, { _, h, m ->
-                        endTime = String.format("%02d:%02d", h, m)
+                        viewModel.updateEndTime(String.format("%02d:%02d", h, m))
                     }, calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE), false).show()
                 })
             }
 
             Spacer(modifier = Modifier.height(16.dp))
 
-// ...
-            var locationQuery by remember { mutableStateOf(eventLocation) }
-            val allAddresses = listOf(
-                "123 Main St, New York, NY",
-                "456 Maple Ave, Los Angeles, CA",
-                "789 Oak Blvd, Chicago, IL",
-                "1600 Pennsylvania Ave NW, Washington, DC",
-                "1 Infinite Loop, Cupertino, CA"
-            )
-            val locationSuggestions = allAddresses.filter {
-                it.contains(locationQuery, ignoreCase = true)
-            }
-
-            var showDropdown by remember { mutableStateOf(false) }
             TextFieldSection(
                 label = "Location",
                 value = locationQuery,
@@ -216,8 +227,8 @@ fun CreateEventScreen(navController: NavController) {
                                     .fillMaxWidth()
                                     .clickable {
                                         showDropdown = false
-                                        eventLocation = address
-                                        locationQuery = address // to reflect selected value in text field
+                                        viewModel.updateLocation(address)
+                                        locationQuery = address
                                     }
                                     .padding(vertical = 8.dp)
                             )
@@ -225,7 +236,6 @@ fun CreateEventScreen(navController: NavController) {
                     }
                 }
             }
-
 
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -236,14 +246,6 @@ fun CreateEventScreen(navController: NavController) {
                         .fillMaxWidth()
                         .height(140.dp)
                         .padding(top = 8.dp)
-                        .bringIntoViewRequester(bringIntoViewRequester)
-                        .onFocusChanged {
-                            if (it.isFocused) {
-                                coroutineScope.launch {
-                                    bringIntoViewRequester.bringIntoView()
-                                }
-                            }
-                        }
                         .border(
                             BorderStroke(2.dp, Color.Red), // red border
                             shape = RoundedCornerShape(12.dp)
@@ -275,15 +277,8 @@ fun CreateEventScreen(navController: NavController) {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-
-            AccordionCard(false, true,"Hosts", Icons.Default.People) {
-                var coHostQuery by remember { mutableStateOf("") }
-
-                val allProfiles = listOf("Alice Johnson", "Bob Smith", "Carmen Reyes", "David Chen",
-                    "Eva Patel", "Google", "Facebook", "Amazon", "Microsoft")
-                val cohostSuggestions = allProfiles.filter {
-                    it.contains(coHostQuery, ignoreCase = true) && !invitedCoHosts.contains(it)
-                }
+            AccordionCard(false, true, "Hosts", Icons.Default.People) {
+                val bringIntoViewRequester = remember { BringIntoViewRequester() }
 
                 TextFieldSection(true, "Search for a co-host", coHostQuery, { coHostQuery = it }, "Search")
 
@@ -299,7 +294,7 @@ fun CreateEventScreen(navController: NavController) {
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .clickable {
-                                            invitedCoHosts = invitedCoHosts + name
+                                            viewModel.addCohost(name)
                                             coHostQuery = ""
                                         }
                                         .bringIntoViewRequester(bringIntoViewRequester)
@@ -335,27 +330,20 @@ fun CreateEventScreen(navController: NavController) {
                                     contentDescription = "Remove",
                                     modifier = Modifier
                                         .size(16.dp)
-                                        .clickable { invitedCoHosts = invitedCoHosts - name }
+                                        .clickable { viewModel.removeCohost(name) }
                                 )
                             }
                         }
                     }
                 }
-
-                Spacer(modifier = Modifier.height(16.dp))
             }
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            AccordionCard(false, false,"Sponsors (Optional)", Icons.Default.AttachMoney) {
-                var sponsorQuery by remember { mutableStateOf("") }
-                var invitedSponsors by remember { mutableStateOf(listOf<String>()) }
-                val allProfiles = listOf("Google", "Facebook", "Amazon", "Microsoft")
-                val sponsorSuggestions = allProfiles.filter {
-                    it.contains(sponsorQuery, ignoreCase = true) && !invitedSponsors.contains(it)
-                }
+            AccordionCard(false, false, "Sponsors (Optional)", Icons.Default.AttachMoney) {
+                val bringIntoViewRequester = remember { BringIntoViewRequester() }
 
-                TextFieldSection(false,"Search for a sponsor", sponsorQuery, { sponsorQuery = it }, "Search")
+                TextFieldSection(false, "Search for a sponsor", sponsorQuery, { sponsorQuery = it }, "Search")
 
                 if (sponsorQuery.isNotBlank() && sponsorSuggestions.isNotEmpty()) {
                     Card(
@@ -369,7 +357,7 @@ fun CreateEventScreen(navController: NavController) {
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .clickable {
-                                            invitedSponsors = invitedSponsors + name
+                                            viewModel.addSponsor(name)
                                             sponsorQuery = ""
                                         }
                                         .bringIntoViewRequester(bringIntoViewRequester)
@@ -405,20 +393,19 @@ fun CreateEventScreen(navController: NavController) {
                                     contentDescription = "Remove",
                                     modifier = Modifier
                                         .size(16.dp)
-                                        .clickable { invitedSponsors = invitedSponsors - name }
+                                        .clickable { viewModel.removeSponsor(name) }
                                 )
                             }
                         }
                     }
                 }
-
-                Spacer(modifier = Modifier.height(16.dp))
             }
+
+
+
         }
     }
 }
-
-
 
 @Composable
 fun TextFieldSection(
@@ -431,20 +418,20 @@ fun TextFieldSection(
     allowTyping: Boolean = true,
     onClick: (() -> Unit)? = null
 ) {
-        Text(
-            text = buildAnnotatedString {
-                append(label)
-                if(required) {
+    Text(
+        text = buildAnnotatedString {
+            append(label)
+            if (required) {
                 withStyle(style = SpanStyle(color = Color.Red)) {
                     append(" *")
-                }}
-            },
-            fontSize = 16.sp,
-            fontWeight = FontWeight.Medium,
-            color = Color.Black
-        )
-        Spacer(modifier = Modifier.height(4.dp))
-
+                }
+            }
+        },
+        fontSize = 16.sp,
+        fontWeight = FontWeight.Medium,
+        color = Color.Black
+    )
+    Spacer(modifier = Modifier.height(4.dp))
 
     if (!allowTyping) {
         Box(
@@ -453,18 +440,17 @@ fun TextFieldSection(
                 .height(if (isMultiline) 120.dp else 56.dp)
                 .clip(RoundedCornerShape(12.dp))
                 .background(Color(0xFFF2F2F2))
-                .clickable(enabled = onClick != null) { onClick?.invoke() } // ✅ ensures click works
+                .clickable(enabled = onClick != null) { onClick?.invoke() }
         ) {
             OutlinedTextField(
                 value = value,
                 onValueChange = onValueChange,
                 placeholder = { Text(placeholder, fontSize = 16.sp) },
-                modifier = Modifier
-                    .fillMaxSize(),
+                modifier = Modifier.fillMaxSize(),
                 textStyle = LocalTextStyle.current.copy(fontSize = 16.sp),
                 shape = RoundedCornerShape(12.dp),
-                readOnly = true, // ✅ force readOnly to prevent keyboard
-                enabled = false, // ✅ visually disabled (optional)
+                readOnly = true,
+                enabled = false,
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedBorderColor = Color.Transparent,
                     unfocusedBorderColor = Color.Transparent,
@@ -477,25 +463,26 @@ fun TextFieldSection(
             )
         }
     } else {
-    OutlinedTextField(
-        value = value,
-        textStyle = LocalTextStyle.current.copy(fontSize = 16.sp),
-        onValueChange = onValueChange,
-        placeholder = { Text(placeholder, fontSize = 16.sp) },
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(if (isMultiline) 120.dp else 56.dp)
-            .clip(RoundedCornerShape(12.dp))
-            .clickable(enabled = onClick != null) { onClick?.invoke() },
-        shape = RoundedCornerShape(12.dp),
-        readOnly = false,
-        colors = OutlinedTextFieldDefaults.colors(
-            focusedBorderColor = Color.Transparent,
-            unfocusedBorderColor = Color.Transparent,
-            focusedContainerColor = Color(0xFFF2F2F2),
-            unfocusedContainerColor = Color(0xFFF2F2F2)
+        OutlinedTextField(
+            value = value,
+            onValueChange = onValueChange,
+            placeholder = { Text(placeholder, fontSize = 16.sp) },
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(if (isMultiline) 120.dp else 56.dp)
+                .clip(RoundedCornerShape(12.dp))
+                .clickable(enabled = onClick != null) { onClick?.invoke() },
+            textStyle = LocalTextStyle.current.copy(fontSize = 16.sp),
+            shape = RoundedCornerShape(12.dp),
+            readOnly = false,
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedBorderColor = Color.Transparent,
+                unfocusedBorderColor = Color.Transparent,
+                focusedContainerColor = Color(0xFFF2F2F2),
+                unfocusedContainerColor = Color(0xFFF2F2F2)
+            )
         )
-    ) }
+    }
 }
 
 @Composable
@@ -506,7 +493,6 @@ fun AccordionCard(
     icon: androidx.compose.ui.graphics.vector.ImageVector,
     onExpand: (() -> Unit)? = null,
     content: @Composable ColumnScope.() -> Unit
-
 ) {
     var expanded by remember { mutableStateOf(isExpanded) }
 
@@ -532,14 +518,15 @@ fun AccordionCard(
                 Text(
                     text = buildAnnotatedString {
                         append(title)
-                        if(required) {
-                        withStyle(style = SpanStyle(color = Color.Red)) {
-                            append(" *")
-                        }}
+                        if (required) {
+                            withStyle(style = SpanStyle(color = Color.Red)) {
+                                append(" *")
+                            }
+                        }
                     },
-
-                 fontWeight = FontWeight.SemiBold, modifier = Modifier.weight(1f))
-
+                    fontWeight = FontWeight.SemiBold,
+                    modifier = Modifier.weight(1f)
+                )
                 Icon(
                     imageVector = if (expanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
                     contentDescription = null,
