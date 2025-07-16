@@ -15,6 +15,7 @@ import com.example.sabcvasampleapp.presentation.calendar.CalendarScreen
 import com.example.sabcvasampleapp.presentation.eventpage.EventScreen
 import com.example.sabcvasampleapp.presentation.createevent.CreateEventScreen
 import com.example.sabcvasampleapp.ui.theme.SABCVASampleAppTheme
+import com.example.sabcvasampleapp.presentation.CreatePostScreen
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -24,7 +25,7 @@ class MainActivity : ComponentActivity() {
             SABCVASampleAppTheme {
                 val navController = rememberNavController()
                 Surface(modifier = Modifier.fillMaxSize()) {
-                    NavHost(navController = navController, startDestination = "create_event") {
+                    NavHost(navController = navController, startDestination = "create_post") {
                         composable("calendar") {
                             CalendarScreen(navController)
                         }
@@ -36,6 +37,9 @@ class MainActivity : ComponentActivity() {
                         }
                         composable("create_event") {
                             CreateEventScreen(navController)
+                        }
+                        composable("create_post") {
+                            CreatePostScreen(navController)
                         }
                     }
 
