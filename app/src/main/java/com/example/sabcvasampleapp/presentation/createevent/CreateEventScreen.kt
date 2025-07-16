@@ -457,7 +457,7 @@ fun TextFieldSection(
         OutlinedTextField(
             value = value,
             onValueChange = onValueChange,
-            placeholder = { Text(placeholder, fontSize = 16.sp) },
+            placeholder = { Text(placeholder, fontSize = 16.sp, color = Color.DarkGray) },
             modifier = Modifier
                 .fillMaxWidth()
                 .height(if (isMultiline) 120.dp else 56.dp)
@@ -470,7 +470,7 @@ fun TextFieldSection(
                 focusedBorderColor = Color.Transparent,
                 unfocusedBorderColor = Color.Transparent,
                 focusedContainerColor = Color(0xFFF2F2F2),
-                unfocusedContainerColor = Color(0xFFF2F2F2)
+                unfocusedContainerColor = Color(0xFFF2F2F2),
             )
         )
     }
