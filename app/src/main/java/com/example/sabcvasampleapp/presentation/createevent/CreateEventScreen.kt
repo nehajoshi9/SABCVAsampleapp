@@ -55,7 +55,7 @@ fun CreateEventScreen(navController: NavController) {
     val scrollState = rememberScrollState()
     var selectedFileUri by remember { mutableStateOf<Uri?>(null) }
     var requiredFilled by remember { mutableStateOf(false) }
-
+    var showDialog by remember { mutableStateOf(false) }
     requiredFilled = eventTitle.isNotBlank() && eventDate.isNotBlank() && eventLocation.isNotBlank() && eventDescription.isNotBlank() && startTime.isNotBlank() && endTime.isNotBlank() && invitedCoHosts.isNotEmpty()
 
 // 🧩 File Picker Launcher
@@ -73,6 +73,35 @@ fun CreateEventScreen(navController: NavController) {
     )
     val calendar = Calendar.getInstance()
 
+    if (showDialog) {
+        BasicAlertDialog(
+            onDismissRequest = { showDialog = false },
+            content = {
+                Surface(
+                    shape = RoundedCornerShape(12.dp),
+                    tonalElevation = 6.dp
+                ) {
+                    Column(
+                        modifier = Modifier.padding(24.dp),
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        Text("Please fill out all required fields", fontWeight = FontWeight.SemiBold)
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.End
+                        ) {
+                            TextButton(onClick = { showDialog = false }) {
+                                Text("Ok")
+                            }
+                        }
+                    }
+                }
+            }
+        )
+    }
+
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -86,7 +115,12 @@ fun CreateEventScreen(navController: NavController) {
                 },
                 actions = {
                     Button(
-                        onClick = { /* Publish */ },
+                        onClick = {
+                            if(!requiredFilled) {
+                                showDialog = true
+                            }
+
+                        /* Publish */ },
                         colors = ButtonDefaults.buttonColors(
                             containerColor = Color.White,
                             contentColor = Color(0xFFB00020)
@@ -321,7 +355,7 @@ fun CreateEventScreen(navController: NavController) {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            AccordionCard(false, false,"Sponsors", Icons.Default.AttachMoney) {
+            AccordionCard(false, false,"Sponsors (Optional)", Icons.Default.AttachMoney) {
                 var sponsorQuery by remember { mutableStateOf("") }
                 var invitedSponsors by remember { mutableStateOf(listOf<String>()) }
                 val allProfiles = listOf("Google", "Facebook", "Amazon", "Microsoft")
