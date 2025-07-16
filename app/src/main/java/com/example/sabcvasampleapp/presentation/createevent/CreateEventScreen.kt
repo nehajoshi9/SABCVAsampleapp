@@ -11,9 +11,6 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -34,10 +31,8 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.relocation.BringIntoViewRequester
 import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.ui.res.painterResource
 import kotlinx.coroutines.launch
 import androidx.navigation.NavController
-import com.example.sabcvasampleapp.R
 import java.util.*
 import android.net.Uri
 import androidx.compose.ui.text.SpanStyle
@@ -50,7 +45,7 @@ fun CreateEventScreen(navController: NavController) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
     val bringIntoViewRequester = remember { BringIntoViewRequester() }
-
+    var invitedCoHosts by remember { mutableStateOf(listOf<String>()) }
     var eventTitle by remember { mutableStateOf("") }
     var eventDate by remember { mutableStateOf("") }
     var startTime by remember { mutableStateOf("") }
@@ -59,7 +54,9 @@ fun CreateEventScreen(navController: NavController) {
     var eventDescription by remember { mutableStateOf("") }
     val scrollState = rememberScrollState()
     var selectedFileUri by remember { mutableStateOf<Uri?>(null) }
+    var requiredFilled by remember { mutableStateOf(false) }
 
+    requiredFilled = eventTitle.isNotBlank() && eventDate.isNotBlank() && eventLocation.isNotBlank() && eventDescription.isNotBlank() && startTime.isNotBlank() && endTime.isNotBlank() && invitedCoHosts.isNotEmpty()
 
 // 🧩 File Picker Launcher
     val filePickerLauncher = rememberLauncherForActivityResult(
@@ -114,15 +111,15 @@ fun CreateEventScreen(navController: NavController) {
                 .padding(paddingValues)
                 .padding(horizontal = 20.dp, vertical = 16.dp)
         ) {
-            TextFieldSection("Event Title", eventTitle, { eventTitle = it }, "Give your event a name")
+            TextFieldSection(true, "Event Title", eventTitle, { eventTitle = it }, "Give your event a name")
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            TextFieldSection("Description", eventDescription, { eventDescription = it }, "Tell people what your event is about", isMultiline = true)
+            TextFieldSection(true,"Description", eventDescription, { eventDescription = it }, "Tell people what your event is about", isMultiline = true)
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            TextFieldSection("Date", eventDate, {}, "MM/DD/YYYY", isReadOnly = true, onClick = {
+            TextFieldSection(true, "Date", eventDate, {}, "MM/DD/YYYY", isReadOnly = true, onClick = {
                 DatePickerDialog(context, { _, y, m, d ->
                     eventDate = String.format("%02d/%02d/%04d", m + 1, d, y)
                 }, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH)).show()
@@ -131,7 +128,7 @@ fun CreateEventScreen(navController: NavController) {
             Spacer(modifier = Modifier.height(16.dp))
 
             AccordionCard(true, true,"Event Duration", Icons.Default.AccessTime) {
-                TextFieldSection("Start Time", startTime, {}, "HH:MM", isReadOnly = true, onClick = {
+                TextFieldSection(true, "Start Time", startTime, {}, "HH:MM", isReadOnly = true, onClick = {
                     TimePickerDialog(context, { _, h, m ->
                         startTime = String.format("%02d:%02d", h, m)
                     }, calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE), false).show()
@@ -139,7 +136,7 @@ fun CreateEventScreen(navController: NavController) {
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                TextFieldSection("End Time", endTime, {}, "HH:MM", isReadOnly = true, onClick = {
+                TextFieldSection(true, "End Time", endTime, {}, "HH:MM", isReadOnly = true, onClick = {
                     TimePickerDialog(context, { _, h, m ->
                         endTime = String.format("%02d:%02d", h, m)
                     }, calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE), false).show()
@@ -252,16 +249,17 @@ fun CreateEventScreen(navController: NavController) {
 
             Spacer(modifier = Modifier.height(16.dp))
 
+
             AccordionCard(false, true,"Hosts", Icons.Default.People) {
                 var coHostQuery by remember { mutableStateOf("") }
-                var invitedCoHosts by remember { mutableStateOf(listOf<String>()) }
+
                 val allProfiles = listOf("Alice Johnson", "Bob Smith", "Carmen Reyes", "David Chen",
                     "Eva Patel", "Google", "Facebook", "Amazon", "Microsoft")
                 val cohostSuggestions = allProfiles.filter {
                     it.contains(coHostQuery, ignoreCase = true) && !invitedCoHosts.contains(it)
                 }
 
-                TextFieldSection("Search for a co-host", coHostQuery, { coHostQuery = it }, "Search")
+                TextFieldSection(true, "Search for a co-host", coHostQuery, { coHostQuery = it }, "Search")
 
                 if (coHostQuery.isNotBlank() && cohostSuggestions.isNotEmpty()) {
                     Card(
@@ -323,30 +321,30 @@ fun CreateEventScreen(navController: NavController) {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            AccordionCard(false, true,"Sponsors", Icons.Default.AttachMoney) {
-                var coHostQuery by remember { mutableStateOf("") }
-                var invitedCoHosts by remember { mutableStateOf(listOf<String>()) }
+            AccordionCard(false, false,"Sponsors", Icons.Default.AttachMoney) {
+                var sponsorQuery by remember { mutableStateOf("") }
+                var invitedSponsors by remember { mutableStateOf(listOf<String>()) }
                 val allProfiles = listOf("Google", "Facebook", "Amazon", "Microsoft")
-                val cohostSuggestions = allProfiles.filter {
-                    it.contains(coHostQuery, ignoreCase = true) && !invitedCoHosts.contains(it)
+                val sponsorSuggestions = allProfiles.filter {
+                    it.contains(sponsorQuery, ignoreCase = true) && !invitedSponsors.contains(it)
                 }
 
-                TextFieldSection("Search for a sponsor", coHostQuery, { coHostQuery = it }, "Search")
+                TextFieldSection(false,"Search for a sponsor", sponsorQuery, { sponsorQuery = it }, "Search")
 
-                if (coHostQuery.isNotBlank() && cohostSuggestions.isNotEmpty()) {
+                if (sponsorQuery.isNotBlank() && sponsorSuggestions.isNotEmpty()) {
                     Card(
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(8.dp)
                     ) {
                         Column(modifier = Modifier.padding(8.dp)) {
-                            cohostSuggestions.forEach { name ->
+                            sponsorSuggestions.forEach { name ->
                                 Text(
                                     text = name,
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .clickable {
-                                            invitedCoHosts = invitedCoHosts + name
-                                            coHostQuery = ""
+                                            invitedSponsors = invitedSponsors + name
+                                            sponsorQuery = ""
                                         }
                                         .bringIntoViewRequester(bringIntoViewRequester)
                                         .onFocusChanged {
@@ -364,7 +362,7 @@ fun CreateEventScreen(navController: NavController) {
                 }
 
                 FlowRow(modifier = Modifier.padding(top = 8.dp)) {
-                    invitedCoHosts.forEach { name ->
+                    invitedSponsors.forEach { name ->
                         Surface(
                             color = Color(0xFFE0E0E0),
                             shape = RoundedCornerShape(50),
@@ -381,7 +379,7 @@ fun CreateEventScreen(navController: NavController) {
                                     contentDescription = "Remove",
                                     modifier = Modifier
                                         .size(16.dp)
-                                        .clickable { invitedCoHosts = invitedCoHosts - name }
+                                        .clickable { invitedSponsors = invitedSponsors - name }
                                 )
                             }
                         }
@@ -398,6 +396,7 @@ fun CreateEventScreen(navController: NavController) {
 
 @Composable
 fun TextFieldSection(
+    required: Boolean = true,
     label: String,
     value: String,
     onValueChange: (String) -> Unit,
@@ -409,9 +408,10 @@ fun TextFieldSection(
         Text(
             text = buildAnnotatedString {
                 append(label)
+                if(required) {
                 withStyle(style = SpanStyle(color = Color.Red)) {
                     append(" *")
-                }
+                }}
             },
             fontSize = 16.sp,
             fontWeight = FontWeight.Medium,
