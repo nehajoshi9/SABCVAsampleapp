@@ -1,6 +1,7 @@
 // --- MainActivity.kt ---
 package com.example.sabcvasampleapp
 
+import android.R.style.Theme
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -47,8 +48,10 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -72,7 +75,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            sabcvasampleappTheme {
+            SABCVASampleAppTheme {
                 CommunityScreen()
             }
         }
@@ -111,8 +114,6 @@ fun CommunityScreen() {
         }
     }
 }
-
-
 
 @Composable
 fun TopBar(onPostClick: () -> Unit) {
@@ -239,12 +240,12 @@ fun AnnouncementCard() {
                 .height(120.dp)
                 .padding(top = 15.dp)
             ){
-                Image(
-                    painter = painterResource(id = R.drawable.scheduled_maintenance_message_examples_and_inspiration0a),
-                    contentDescription = stringResource(id = R.string.maintMess),
-                    modifier = Modifier.fillMaxSize(),
-                    contentScale = ContentScale.Crop
-                )
+                //Image(
+                  //  painter = painterResource(id = R.drawable.),
+                  //  contentDescription = stringResource(id = R.string.maintMess),
+                  //  modifier = Modifier.fillMaxSize(),
+                  //  contentScale = ContentScale.Crop
+               // )
             }
 
             Spacer(modifier = Modifier.height(8.dp))
