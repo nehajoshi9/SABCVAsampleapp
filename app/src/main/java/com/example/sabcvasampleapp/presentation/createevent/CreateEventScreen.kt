@@ -40,6 +40,9 @@ import androidx.navigation.NavController
 import com.example.sabcvasampleapp.R
 import java.util.*
 import android.net.Uri
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.withStyle
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class, ExperimentalFoundationApi::class)
 @Composable
@@ -127,7 +130,7 @@ fun CreateEventScreen(navController: NavController) {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            AccordionCard(true, "Event Duration", Icons.Default.AccessTime) {
+            AccordionCard(true, true,"Event Duration", Icons.Default.AccessTime) {
                 TextFieldSection("Start Time", startTime, {}, "HH:MM", isReadOnly = true, onClick = {
                     TimePickerDialog(context, { _, h, m ->
                         startTime = String.format("%02d:%02d", h, m)
@@ -166,16 +169,18 @@ fun CreateEventScreen(navController: NavController) {
             )
             Spacer(modifier = Modifier.height(4.dp))*/
 
+            var showDropdown by remember { mutableStateOf(false) }
             TextFieldSection(
                 label = "Location",
                 value = locationQuery,
                 onValueChange = {
                     locationQuery = it
+                    showDropdown = locationQuery.length >= 4 && locationSuggestions.isNotEmpty()
                 },
                 placeholder = "Search"
             )
 
-            if (locationQuery.isNotBlank() && locationSuggestions.isNotEmpty()) {
+            if (showDropdown) {
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(8.dp)
@@ -187,6 +192,7 @@ fun CreateEventScreen(navController: NavController) {
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .clickable {
+                                        showDropdown = false
                                         eventLocation = address
                                         locationQuery = address // to reflect selected value in text field
                                     }
@@ -201,7 +207,7 @@ fun CreateEventScreen(navController: NavController) {
             Spacer(modifier = Modifier.height(16.dp))
 
             // Upload Placeholder
-            AccordionCard(false, "Add Media (Optional)", Icons.Default.IosShare) {
+            AccordionCard(false, false,"Add Media (Optional)", Icons.Default.IosShare) {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -227,13 +233,13 @@ fun CreateEventScreen(navController: NavController) {
                         Icon(
                             imageVector = if (selectedFileUri != null) Icons.Default.Check else Icons.Default.IosShare, // ← you'll add this
                             contentDescription = "Upload Icon",
-                            tint = if (selectedFileUri != null) Color(0xFF4CAF50) else Color.Red,
+                            tint = if (selectedFileUri != null) Color(0xFF4CAF50) else Color(0xFFe30029),
                             modifier = Modifier.size(40.dp)
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
                             text = if (selectedFileUri != null) "File Selected" else "Click to upload or drag and drop",
-                            color = if (selectedFileUri != null) Color(0xFF4CAF50) else Color.Red
+                            color = if (selectedFileUri != null) Color(0xFF4CAF50) else Color(0xFFe30029)
                         )
                         Text(
                             if (selectedFileUri != null) "Click to change file" else "Images, PDFs, documents up to 10MB",
@@ -246,7 +252,7 @@ fun CreateEventScreen(navController: NavController) {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            AccordionCard(false, "Hosts", Icons.Default.People) {
+            AccordionCard(false, true,"Hosts", Icons.Default.People) {
                 var coHostQuery by remember { mutableStateOf("") }
                 var invitedCoHosts by remember { mutableStateOf(listOf<String>()) }
                 val allProfiles = listOf("Alice Johnson", "Bob Smith", "Carmen Reyes", "David Chen",
@@ -317,7 +323,7 @@ fun CreateEventScreen(navController: NavController) {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            AccordionCard(false, "Sponsors", Icons.Default.AttachMoney) {
+            AccordionCard(false, true,"Sponsors", Icons.Default.AttachMoney) {
                 var coHostQuery by remember { mutableStateOf("") }
                 var invitedCoHosts by remember { mutableStateOf(listOf<String>()) }
                 val allProfiles = listOf("Google", "Facebook", "Amazon", "Microsoft")
@@ -400,15 +406,19 @@ fun TextFieldSection(
     isReadOnly: Boolean = false,
     onClick: (() -> Unit)? = null
 ) {
-    if (label.isNotBlank()) {
         Text(
-            text = label,
+            text = buildAnnotatedString {
+                append(label)
+                withStyle(style = SpanStyle(color = Color.Red)) {
+                    append(" *")
+                }
+            },
             fontSize = 16.sp,
             fontWeight = FontWeight.Medium,
             color = Color.Black
         )
         Spacer(modifier = Modifier.height(4.dp))
-    }
+
 
     OutlinedTextField(
         value = value,
@@ -434,10 +444,12 @@ fun TextFieldSection(
 @Composable
 fun AccordionCard(
     isExpanded: Boolean,
+    required: Boolean = true,
     title: String,
     icon: androidx.compose.ui.graphics.vector.ImageVector,
     onExpand: (() -> Unit)? = null,
     content: @Composable ColumnScope.() -> Unit
+
 ) {
     var expanded by remember { mutableStateOf(isExpanded) }
 
@@ -460,7 +472,17 @@ fun AccordionCard(
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(imageVector = icon, contentDescription = null, tint = Color(0xFFB00020))
                 Spacer(modifier = Modifier.width(12.dp))
-                Text(title, fontWeight = FontWeight.SemiBold, modifier = Modifier.weight(1f))
+                Text(
+                    text = buildAnnotatedString {
+                        append(title)
+                        if(required) {
+                        withStyle(style = SpanStyle(color = Color.Red)) {
+                            append(" *")
+                        }}
+                    },
+
+                 fontWeight = FontWeight.SemiBold, modifier = Modifier.weight(1f))
+
                 Icon(
                     imageVector = if (expanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
                     contentDescription = null,
