@@ -146,18 +146,7 @@ fun CreateEventScreen(navController: NavController) {
             Spacer(modifier = Modifier.height(16.dp))
 
 // ...
-
-                    Text(
-                        text = "Location",
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.Medium,
-                        color = Color(0xFF374151)
-                    )
-            Spacer(modifier = Modifier.height(4.dp))
-
-            val focusManager = LocalFocusManager.current
-            val focusRequester = remember { FocusRequester() }
-            var expanded by remember { mutableStateOf(false) }
+            var locationQuery by remember { mutableStateOf(eventLocation) }
             val allAddresses = listOf(
                 "123 Main St, New York, NY",
                 "456 Maple Ave, Los Angeles, CA",
@@ -165,55 +154,45 @@ fun CreateEventScreen(navController: NavController) {
                 "1600 Pennsylvania Ave NW, Washington, DC",
                 "1 Infinite Loop, Cupertino, CA"
             )
-            val suggestions = remember(eventLocation) {
-                if (eventLocation.isBlank()) emptyList()
-                else allAddresses.filter { it.contains(eventLocation, ignoreCase = true) }
+            val locationSuggestions = allAddresses.filter {
+                it.contains(locationQuery, ignoreCase = true)
             }
 
-            ExposedDropdownMenuBox(
-                expanded = expanded,
-                onExpandedChange = {
-                    expanded = it
-                    if (!it) focusManager.clearFocus()
-                }
-            ) {
-                OutlinedTextField(
-                    value = eventLocation,
-                    onValueChange = {
-                        eventLocation = it
-                        expanded = true
-                    },
-                    placeholder = { Text("Add a location") },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .menuAnchor()
-                        .focusRequester(focusRequester)
-                        .onFocusChanged { focusState ->
-                            if (!focusState.isFocused) expanded = false
-                        },
-                    shape = RoundedCornerShape(12.dp),
-                    trailingIcon = {
-                        ExposedDropdownMenuDefaults.TrailingIcon(expanded)
-                    },
-                    singleLine = true
-                )
+            Text(
+                text = "Location",
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Medium,
+                color = Color(0xFF374151)
+            )
+            Spacer(modifier = Modifier.height(4.dp))
 
-                ExposedDropdownMenu(
-                    expanded = expanded && suggestions.isNotEmpty(),
-                    onDismissRequest = {
-                        expanded = false
-                        focusManager.clearFocus()
-                    }
+            TextFieldSection(
+                label = "",
+                value = locationQuery,
+                onValueChange = {
+                    locationQuery = it
+                },
+                placeholder = "Search"
+            )
+
+            if (locationQuery.isNotBlank() && locationSuggestions.isNotEmpty()) {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(8.dp)
                 ) {
-                    suggestions.forEach { address ->
-                        DropdownMenuItem(
-                            text = { Text(address) },
-                            onClick = {
-                                eventLocation = address
-                                expanded = false
-                                focusManager.clearFocus()
-                            }
-                        )
+                    Column(modifier = Modifier.padding(8.dp)) {
+                        locationSuggestions.forEach { address ->
+                            Text(
+                                text = address,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable {
+                                        eventLocation = address
+                                        locationQuery = address // to reflect selected value in text field
+                                    }
+                                    .padding(vertical = 8.dp)
+                            )
+                        }
                     }
                 }
             }
@@ -421,13 +400,16 @@ fun TextFieldSection(
     isReadOnly: Boolean = false,
     onClick: (() -> Unit)? = null
 ) {
-    Text(
-        text = label,
-        fontSize = 16.sp,
-        fontWeight = FontWeight.Medium,
-        color = Color.Black
-    )
-    Spacer(modifier = Modifier.height(4.dp))
+    if (label.isNotBlank()) {
+        Text(
+            text = label,
+            fontSize = 16.sp,
+            fontWeight = FontWeight.Medium,
+            color = Color.Black
+        )
+        Spacer(modifier = Modifier.height(4.dp))
+    }
+
     OutlinedTextField(
         value = value,
         textStyle = LocalTextStyle.current.copy(fontSize = 16.sp),
