@@ -116,11 +116,11 @@ object Repository {
             comments = listOf(
                 Comment("John Doe", "Looking forward to this event!", 1751992800000),
                 Comment("Alice Kim", "Can't wait to join.", 1751820000000)
-            )
+            ), hosts = listOf("Alice Johnson", "Google", "Carmen Reyes")
         ),
         EventDetails(
             id = UUID.randomUUID().toString(),
-            title = "Tech Conference 2023",
+            title = "Tech Conference 2025",
             startDate = buildDate(2025, Calendar.JULY, 22, 9, 0),
             endDate = buildDate(2025, Calendar.JULY, 18, 17, 0),
             location = "Downtown Convention Center",
@@ -128,7 +128,7 @@ object Repository {
             attendees = listOf("SP", "LK", "AB"),
             comments = listOf(
                 Comment("Raj Patel", "Super hyped!", 1751873800000)
-            )
+            ), hosts = listOf("Eva Patel")
         )
     )
 
@@ -164,6 +164,17 @@ object Repository {
         }
     }
 
+    fun removeAttendee(eventId: String, attendeeName: String) {
+        val index = allEvents.indexOfFirst { it.id == eventId }
+        if (index != -1) {
+            val event = allEvents[index]
+            val updatedEvent = event.copy(
+                attendees = event.attendees - attendeeName
+            )
+            allEvents[index] = updatedEvent
+        }
+    }
+
     fun addComment(eventId: String, message: String) {
         val index = allEvents.indexOfFirst { it.id == eventId }
         if (index != -1) {
@@ -181,8 +192,8 @@ object Repository {
         }
     }
 
-    fun addEvent(title: String, startDate: Date, endDate: Date, location: String, description: String, cohosts: List<String>, image: Uri? = null) {
-        allEvents.add(EventDetails(UUID.randomUUID().toString(), title, startDate, endDate, location, description, listOf(), cohosts, listOf(), image))
+    fun addEvent(title: String, startDate: Date, endDate: Date, location: String, description: String, hosts: List<String>, image: Uri? = null) {
+        allEvents.add(EventDetails(UUID.randomUUID().toString(), title, startDate, endDate, location, description, listOf(), hosts, listOf(), image))
     }
 
    /* fun removeEvent(eventId: String) {

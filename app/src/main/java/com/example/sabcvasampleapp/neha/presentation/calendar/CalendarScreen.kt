@@ -52,6 +52,7 @@ fun CalendarScreen(navController: NavController) {
     var filteredEvents by remember { mutableStateOf(events) }
     val selectedFilter = viewModel.selectedFilter.collectAsState().value
     val currentRange = viewModel.getCurrentDateRange()
+    val repository = Repository
 
     LaunchedEffect(events, searchQuery, currentRange) {
         filteredEvents = events.filter {
@@ -77,7 +78,6 @@ fun CalendarScreen(navController: NavController) {
                         color = Color.Black,
                         )
                 },
-
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = Color.White)
 
             )
@@ -165,7 +165,9 @@ fun CalendarScreen(navController: NavController) {
                             navController.navigate("event/$id")
                         },
                         onRSVP = {
-                            Repository.addAttendee(event.id, "YN")
+                            if(!event.attendees.contains("YN")) {
+                                repository.addAttendee(event.id, "YN") }
+                            else repository.removeAttendee(event.id, "YN")
                             viewModel.loadEvent(event.id)
                             viewModel.refreshEvents()
                             filteredEvents = viewModel.events.value.filter {
@@ -243,7 +245,7 @@ fun EventCard(
                 }
 
                 Spacer(modifier = Modifier.height(8.dp))
-                Text(event.title, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                Text(event.title, fontWeight = FontWeight.Bold, fontSize = 20.sp)
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
                     Repository.formatEventDateRange(event.startDate, event.endDate),
@@ -251,17 +253,20 @@ fun EventCard(
                     color = Color.Gray
                 )
                 Spacer(modifier = Modifier.height(4.dp))
-                Text(event.description, fontSize = 14.sp, color = Color.DarkGray)
+                Text(event.description, fontSize = 16.sp, color = Color.Black)
+                Spacer(modifier = Modifier.height(4.dp))
+                Text("Hosted by ${event.hosts.joinToString()}", fontSize = 14.sp, color = Color.DarkGray)
                 Spacer(modifier = Modifier.height(4.dp))
             Text(event.location, fontSize = 12.sp, color = Color.Gray)
             Spacer(modifier = Modifier.height(12.dp))
             Button(
                 onClick = onRSVP,
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFB00020)),
+                colors = ButtonDefaults.buttonColors(containerColor = if (event.attendees.contains("YN")) Color(0xFF388E3C) else Color(0xFFB00020)),
                 shape = RoundedCornerShape(12.dp),
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("RSVP Now", fontSize = 16.sp, color = Color.White)
+                Text(if(event.attendees.contains("YN"))
+                    "RSVP'd" else "RSVP Now", fontSize = 16.sp, color = Color.White)
             }
         }
     }

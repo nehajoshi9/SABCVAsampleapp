@@ -30,7 +30,7 @@ val DefaultEventGradients = listOf(
         colors = listOf(Color(0xFF268FD0), Color(0xFFCEF2EA)) // blue to navy
     ),
     Brush.verticalGradient(
-        colors = listOf(Color(0xFF373B44), Color(0xFF4286f4)) // slate to blue
+        colors = listOf(Color(0xFFDADFFF), Color(0xFF4286f4)) // slate to blue
     ),
     Brush.verticalGradient(
         colors = listOf(Color(0xFFee9ca7), Color(0xFFffdde1)) // pink pastel

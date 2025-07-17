@@ -141,7 +141,7 @@ fun EventScreen(navController: NavController, eventId: String) {
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(e.description, fontSize = 14.sp)
 
-                    Spacer(modifier = Modifier.height(24.dp))
+                    Spacer(modifier = Modifier.height(16.dp))
                     Text("Attendees", fontWeight = FontWeight.Bold, fontSize = 16.sp)
                     Spacer(modifier = Modifier.height(8.dp))
                 }
@@ -179,14 +179,17 @@ fun EventScreen(navController: NavController, eventId: String) {
 
                     Button(
                         onClick = {
-                            repository.addAttendee(eventId, "YN")
+                            if(!e.attendees.contains("YN")) {
+                            repository.addAttendee(eventId, "YN") }
+                            else repository.removeAttendee(eventId, "YN")
                             viewModel.loadEvent(eventId)
                         },
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFB00020)),
+                        colors = ButtonDefaults.buttonColors(containerColor = if (e.attendees.contains("YN")) Color(0xFF388E3C) else Color(0xFFB00020)),
                         shape = RoundedCornerShape(12.dp),
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        Text("RSVP Now", fontSize = 16.sp, color = Color.White)
+                        Text(if(e.attendees.contains("YN"))
+                            "RSVP'd" else "RSVP Now", fontSize = 16.sp, color = Color.White)
                     }
 
                     Spacer(modifier = Modifier.height(8.dp))
