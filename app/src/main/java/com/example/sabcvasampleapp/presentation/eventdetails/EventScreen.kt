@@ -26,6 +26,10 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.sabcvasampleapp.resources.EventDetails
 import com.example.sabcvasampleapp.resources.Repository
+import androidx.compose.foundation.Image
+import androidx.compose.ui.layout.ContentScale
+import coil.compose.rememberAsyncImagePainter
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -45,8 +49,19 @@ fun EventScreen(navController: NavController, eventId: String) {
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(160.dp)
-                    .background(Brush.verticalGradient(colors = listOf(Color(0xFFB00020), Color(0xFFB00020))))
+                    .background(Brush.verticalGradient(colors = listOf(Color(0xFF430C49), Color(0xFFB00020))))
             ) {
+
+                val imageUrl = "https://picsum.photos/600/300"
+                if (imageUrl != null) {
+                    Image(
+                        painter = rememberAsyncImagePainter(model = imageUrl),
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxSize()
+                    )
+                }
+
                 IconButton(
                     onClick = { navController.popBackStack() },
                     modifier = Modifier
@@ -77,13 +92,21 @@ fun EventScreen(navController: NavController, eventId: String) {
                     Icon(Icons.Default.Share, contentDescription = "Share")
                 }
 
-                Text(
-                    e.title,
-                    color = Color.White,
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Medium,
-                    modifier = Modifier.align(Alignment.Center)
-                )
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.Center)
+                        .padding(16.dp)
+                        .background(Color.White, shape = RoundedCornerShape(50))
+                        .padding(horizontal = 16.dp, vertical = 8.dp)
+                ) {
+                    Text(
+                        text = e.title,
+                        color = Color.Black,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 16.sp,
+                        modifier = Modifier.align(Alignment.Center)
+                    )
+                }
             }
 
             LazyColumn(
