@@ -29,6 +29,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -43,10 +44,11 @@ fun CalendarScreen(navController: NavController) {
     var searchQuery by remember { mutableStateOf("") }
     var filteredEvents by remember { mutableStateOf(events) }
     val selectedFilter = viewModel.selectedFilter.collectAsState().value
+    val currentRange = viewModel.getCurrentDateRange()
 
-    LaunchedEffect(events, searchQuery, selectedFilter) {
+    LaunchedEffect(events, searchQuery, currentRange) {
         filteredEvents = events.filter {
-            it.title.contains(searchQuery, ignoreCase = true) && Repository.isDateInRangeInclusive(it.startDate, Repository.dateRangeMap[selectedFilter]!!.invoke())
+            it.title.contains(searchQuery, ignoreCase = true) && Repository.isDateInRangeInclusive(it.startDate, currentRange)
         }
     }
 
@@ -59,14 +61,14 @@ fun CalendarScreen(navController: NavController) {
                 .background(Color.White)
                 .padding(paddingValues)
         ) {
-            TopAppBar(
+            CenterAlignedTopAppBar(
                 title = {
                     Text(
                         "SABC Upcoming Events",
                         fontWeight = FontWeight.Bold,
-                        fontSize = 18.sp,
-                        color = Color.Black
-                    )
+                        fontSize = 24.sp,
+                        color = Color.Black,
+                        )
                 },
 
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = Color.White)
@@ -76,35 +78,22 @@ fun CalendarScreen(navController: NavController) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 32.dp, vertical = 8.dp),
+                    .padding(horizontal = 36.dp, vertical = 8.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                IconButton(onClick = { /* Optional back */ }) {
-                    Icon(
-                        imageVector = Icons.Default.ArrowBack,
-                        contentDescription = "Previous",
-                        tint = Color.Gray
-                    )
+                IconButton(onClick = { viewModel.decrementOffset() }) {
+                    Icon(Icons.Default.ArrowBack, contentDescription = "Back")
                 }
 
                 Text(
-                    text = Repository.formatDateRangeString(Repository.dateRangeMap[selectedFilter]!!.invoke()),
-                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Medium),
-                    color = Color.Gray,
-                    modifier = Modifier
-                        .padding(horizontal = 8.dp)
-                        .weight(1f)
-                        .wrapContentWidth(Alignment.CenterHorizontally)
+                    Repository.formatDateRangeString(viewModel.getCurrentDateRange()),
+                    modifier = Modifier.weight(1f),
+                    textAlign = TextAlign.Center
                 )
 
-                IconButton(onClick = { /* Optional forward */ }) {
-                    Icon(
-                        imageVector = Icons.Default.ArrowBack,
-                        contentDescription = "Next",
-                        tint = Color.Gray,
-                        modifier = Modifier.rotate(180f)
-                    )
+                IconButton(onClick = { viewModel.incrementOffset() }) {
+                    Icon(Icons.Default.ArrowBack, contentDescription = "Forward", modifier = Modifier.rotate(180f))
                 }
             }
 
