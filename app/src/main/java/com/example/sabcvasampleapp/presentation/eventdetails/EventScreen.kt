@@ -294,6 +294,7 @@ fun BadgeWithSquare(text: String, bgColor: Color, textColor: Color) {
         Box(
             modifier = Modifier
                 .size(10.dp)
+
                 .background(textColor, shape = RoundedCornerShape(2.dp))
         )
         Spacer(modifier = Modifier.width(6.dp))

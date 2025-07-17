@@ -32,6 +32,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.example.sabcvasampleapp.presentation.eventdetails.BadgeWithSquare
 import com.example.sabcvasampleapp.resources.Repository
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -195,18 +196,14 @@ fun EventCard(
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             // 👇 Attendee count pill
-            Box(
+            Row(
                 modifier = Modifier
-                    .background(Color(0xFFEEEEEE), shape = RoundedCornerShape(50))
-                    .padding(horizontal = 12.dp, vertical = 6.dp)
-                    .align(Alignment.End)
+                    .fillMaxWidth()
+                    .wrapContentWidth(Alignment.End) // 👈 push to the right
             ) {
-                Text(
-                    text = "${event.attendees.size} attending",
-                    fontSize = 12.sp,
-                    color = Color.DarkGray
-                )
+                BadgeWithSquare("${event.attendees.size} attending", Color(0xFFF2F2F2), Color(0xFF388E3C))
             }
+            //BadgeWithSquare("${event.attendees.size} attending", Color(0xFFF2F2F2), Color(0xFF388E3C))
 
             Spacer(modifier = Modifier.height(8.dp))
             Text(event.title, fontWeight = FontWeight.Bold, fontSize = 16.sp)
