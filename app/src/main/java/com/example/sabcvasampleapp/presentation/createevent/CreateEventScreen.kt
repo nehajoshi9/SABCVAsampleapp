@@ -37,8 +37,6 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import kotlinx.coroutines.launch
-import java.util.*
-import com.example.sabcvasampleapp.presentation.eventdetails.BadgeWithSquare
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class,
     ExperimentalLayoutApi::class
@@ -141,7 +139,22 @@ fun CreateEventScreen(navController: NavController, viewModel: CreateEventViewMo
                         onClick = {
                             viewModel.triggerValidationDialog()
                             if (viewModel.isValid()) {
-                                //Repository.addEvent(eventTitle, )
+                                val startDateCal = Calendar.getInstance().apply { time = eventDate }
+                                val startTimeCal = Calendar.getInstance().apply { time = startTime }
+                                val endTimeCal = Calendar.getInstance().apply { time = endTime }
+
+                                startDateCal.set(Calendar.HOUR_OF_DAY, startTimeCal.get(Calendar.HOUR_OF_DAY))
+                                startDateCal.set(Calendar.MINUTE, startTimeCal.get(Calendar.MINUTE))
+                                startDateCal.set(Calendar.SECOND, startTimeCal.get(Calendar.SECOND))
+                                startDateCal.set(Calendar.MILLISECOND, startTimeCal.get(Calendar.MILLISECOND))
+
+                                val endDateCal = startDateCal.clone() as Calendar
+                                endDateCal.set(Calendar.HOUR_OF_DAY, endTimeCal.get(Calendar.HOUR_OF_DAY))
+                                endDateCal.set(Calendar.MINUTE, endTimeCal.get(Calendar.MINUTE))
+                                endDateCal.set(Calendar.SECOND, endTimeCal.get(Calendar.SECOND))
+                                endDateCal.set(Calendar.MILLISECOND, endTimeCal.get(Calendar.MILLISECOND))
+
+                                Repository.addEvent(eventTitle, startDateCal.time, endDateCal.time, eventLocation, eventDescription, invitedCoHosts)
                                 navController.navigate("calendar")
                                 // Publish
                             }

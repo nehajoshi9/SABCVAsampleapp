@@ -73,6 +73,7 @@ class CreateEventViewModel : ViewModel() {
     fun setFile(uri: Uri?) { fileUri.value = uri }
 
     fun isValid(): Boolean {
+        /*
         val locationOk = isLocationValid.value
         val titleOk = title.value.isNotBlank()
         val descriptionOk = description.value.isNotBlank()
@@ -89,7 +90,7 @@ class CreateEventViewModel : ViewModel() {
         println("startTime not null: $startTimeOk")
         println("endTime not null: $endTimeOk")
         println("location text not blank: $locationTextOk")
-        println("cohosts not empty: $cohostsOk")
+        println("cohosts not empty: $cohostsOk") */
 
         return isLocationValid.value && title.value.isNotBlank() &&
                 description.value.isNotBlank() &&
