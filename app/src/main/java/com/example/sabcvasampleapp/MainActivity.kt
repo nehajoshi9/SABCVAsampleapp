@@ -12,7 +12,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.sabcvasampleapp.presentation.calendar.CalendarScreen
-import com.example.sabcvasampleapp.presentation.eventpage.EventScreen
+import com.example.sabcvasampleapp.presentation.eventdetails.EventScreen
 import com.example.sabcvasampleapp.presentation.createevent.CreateEventScreen
 import com.example.sabcvasampleapp.ui.theme.SABCVASampleAppTheme
 import com.example.sabcvasampleapp.presentation.createpost.CreatePostScreen
@@ -25,7 +25,7 @@ class MainActivity : ComponentActivity() {
             SABCVASampleAppTheme {
                 val navController = rememberNavController()
                 Surface(modifier = Modifier.fillMaxSize()) {
-                    NavHost(navController = navController, startDestination = "calendar") {
+                    NavHost(navController = navController, startDestination = "create_event") {
                         composable("calendar") {
                             CalendarScreen(navController)
                         }

@@ -5,6 +5,20 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 object Repository {
+    fun getFormattedDate(date: Date?): String {
+        return date?.let {
+            val sdf = SimpleDateFormat("MM/dd/yyyy", Locale.getDefault())
+            sdf.format(it)
+        } ?: ""
+    }
+
+    fun getFormattedTime(date: Date?): String {
+        return date?.let {
+            val formatter = SimpleDateFormat("h:mm a", Locale.getDefault()) // 12-hour format with AM/PM
+            formatter.format(it)
+        } ?: ""
+    }
+
     fun buildDate(year: Int, month: Int, day: Int, hour: Int, minute: Int): Date {
         return Calendar.getInstance().apply {
             set(year, month, day, hour, minute, 0)
@@ -61,11 +75,10 @@ object Repository {
 
     fun formatEventDateRange(start: Date, end: Date): String {
         val dayFormat = SimpleDateFormat("EEE, MMM d", Locale.getDefault()) // Wed, Jun 15
-        val timeFormat = SimpleDateFormat("h:mm a", Locale.getDefault())    // 9:00 AM
 
         val dayPart = dayFormat.format(start)
-        val startTime = timeFormat.format(start)
-        val endTime = timeFormat.format(end)
+        val startTime = getFormattedTime(start)
+        val endTime = getFormattedTime(start)
 
         return "$dayPart • $startTime – $endTime"
     }
@@ -113,8 +126,10 @@ object Repository {
         )
     )
 
-    private val allPersonProfiles = mutableListOf<String>("Alice Johnson", "Bob Smith", "Carmen Reyes", "David Chen",
-        "Eva Patel")
+    private val allPersonProfiles = mutableListOf<String>(
+        "Alice Johnson", "Bob Smith", "Carmen Reyes", "David Chen",
+        "Eva Patel"
+    )
 
     val allBusinessProfiles = mutableListOf<String>("Google", "Facebook", "Amazon", "Microsoft")
 
@@ -160,10 +175,11 @@ object Repository {
         }
     }
 
-    /*fun addEvent(id: String, title: String, date: String, location: String, description: String) =
-        allEvents.add(EventDetails(id, title, date, location, description, listOf(), listOf()))
+    fun addEvent(title: String, startDate: Date, endDate: Date, location: String, description: String, cohosts: List<String>) {
+        allEvents.add(EventDetails(UUID.randomUUID().toString(), title, startDate, endDate, location, description, listOf(), cohosts, listOf()))
+    }
 
-    fun removeEvent(eventId: String) {
+   /* fun removeEvent(eventId: String) {
         allEvents.removeIf { it.id == eventId }
     }*/
 }

@@ -1,4 +1,4 @@
-package com.example.sabcvasampleapp.presentation.eventpage
+package com.example.sabcvasampleapp.presentation.eventdetails
 
 import androidx.lifecycle.ViewModel
 import com.example.sabcvasampleapp.resources.Repository

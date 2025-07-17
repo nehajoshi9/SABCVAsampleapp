@@ -10,7 +10,7 @@ data class EventDetails(
     val location: String,
     val description: String,
     val attendees: List<String> = listOf(),
-    val cohosts: List<String> = listOf(),
+    val hosts: List<String> = listOf(),
     val comments: List<Comment> = listOf()
 )
 

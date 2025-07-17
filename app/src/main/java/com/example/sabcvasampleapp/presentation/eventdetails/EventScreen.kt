@@ -1,6 +1,6 @@
 /* Updated EventScreen.kt with SABC theme colors */
 
-package com.example.sabcvasampleapp.presentation.eventpage
+package com.example.sabcvasampleapp.presentation.eventdetails
 
 import android.content.Intent
 import androidx.compose.foundation.background

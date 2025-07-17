@@ -10,6 +10,7 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import java.util.Calendar
 import androidx.compose.foundation.layout.*
 import com.example.sabcvasampleapp.resources.Repository
 import androidx.compose.foundation.relocation.BringIntoViewRequester
@@ -50,7 +51,7 @@ fun CreateEventScreen(navController: NavController, viewModel: CreateEventViewMo
 
     val eventTitle by viewModel.title.collectAsState()
     val eventDescription by viewModel.description.collectAsState()
-    val eventDate by viewModel.date.collectAsState()
+    val eventDate by viewModel.eventDate.collectAsState()
     val startTime by viewModel.startTime.collectAsState()
     val endTime by viewModel.endTime.collectAsState()
     val eventLocation by viewModel.location.collectAsState()
@@ -58,6 +59,8 @@ fun CreateEventScreen(navController: NavController, viewModel: CreateEventViewMo
     val invitedSponsors by viewModel.sponsors.collectAsState()
     val selectedFileUri by viewModel.fileUri.collectAsState()
     val showDialog by viewModel.showDialog.collectAsState()
+
+
 
     val filePickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.OpenDocument(),
@@ -75,8 +78,12 @@ fun CreateEventScreen(navController: NavController, viewModel: CreateEventViewMo
     var coHostQuery by remember { mutableStateOf("") }
     var sponsorQuery by remember { mutableStateOf("") }
 
-    val locationSuggestions = Repository.allAddresses.filter {
-        it.contains(locationQuery, ignoreCase = true)
+    val locationSuggestions by remember(locationQuery) {
+        derivedStateOf {
+            Repository.allAddresses.filter {
+                it.contains(locationQuery, ignoreCase = true)
+            }
+        }
     }
     val cohostSuggestions = Repository.allProfiles.filter {
         it.contains(coHostQuery, ignoreCase = true) && !invitedCoHosts.contains(it)
@@ -86,6 +93,8 @@ fun CreateEventScreen(navController: NavController, viewModel: CreateEventViewMo
     }
 
     var showDropdown by remember { mutableStateOf(false) }
+
+    //val isValid = locationSuggestions.contains(locationQuery)
 
     if (showDialog) {
         BasicAlertDialog(
@@ -131,6 +140,8 @@ fun CreateEventScreen(navController: NavController, viewModel: CreateEventViewMo
                         onClick = {
                             viewModel.triggerValidationDialog()
                             if (viewModel.isValid()) {
+                                //Repository.addEvent(eventTitle, )
+                                navController.navigate("calendar")
                                 // Publish
                             }
                         },
@@ -166,28 +177,65 @@ fun CreateEventScreen(navController: NavController, viewModel: CreateEventViewMo
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            TextFieldSection(true, "Date", eventDate, {}, "MM/DD/YYYY", allowTyping = false, onClick = {
-                DatePickerDialog(context, { _, y, m, d ->
-                    viewModel.updateDate(String.format("%02d/%02d/%04d", m + 1, d, y))
-                }, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH)).show()
-            })
+
+            TextFieldSection(
+                required = true,
+                label = "Date",
+                value = Repository.getFormattedDate(eventDate), // or show "Pick a date" if you want a hint
+                onValueChange = {},
+                placeholder = "MM/DD/YYYY",
+                allowTyping = false,
+                onClick = {
+                    DatePickerDialog(
+                        context,
+                        { _, y, m, d -> viewModel.updateDateFromPicker(y, m, d) },
+                        calendar.get(Calendar.YEAR),
+                        calendar.get(Calendar.MONTH),
+                        calendar.get(Calendar.DAY_OF_MONTH)
+                    ).show()
+                }
+            )
 
             Spacer(modifier = Modifier.height(16.dp))
 
             AccordionCard(true, true, "Event Duration", Icons.Default.AccessTime) {
-                TextFieldSection(true, "Start Time", startTime, {}, "HH:MM", allowTyping = false, onClick = {
-                    TimePickerDialog(context, { _, h, m ->
-                        viewModel.updateStartTime(String.format("%02d:%02d", h, m))
-                    }, calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE), false).show()
-                })
+                TextFieldSection(
+                    required = true,
+                    label = "Start Time",
+                    value = Repository.getFormattedTime(startTime),
+                    onValueChange = {},
+                    placeholder = "HH:MM",
+                    allowTyping = false,
+                    onClick = {
+                        TimePickerDialog(
+                            context,
+                            { _, h, m -> viewModel.updateStartTime(h, m) },
+                            calendar.get(Calendar.HOUR_OF_DAY),
+                            calendar.get(Calendar.MINUTE),
+                            false
+                        ).show()
+                    }
+                )
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                TextFieldSection(true, "End Time", endTime, {}, "HH:MM", allowTyping = false, onClick = {
-                    TimePickerDialog(context, { _, h, m ->
-                        viewModel.updateEndTime(String.format("%02d:%02d", h, m))
-                    }, calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE), false).show()
-                })
+                TextFieldSection(
+                    required = true,
+                    label = "End Time",
+                    value = Repository.getFormattedTime(endTime),
+                    onValueChange = {},
+                    placeholder = "HH:MM",
+                    allowTyping = false,
+                    onClick = {
+                        TimePickerDialog(
+                            context,
+                            { _, h, m -> viewModel.updateEndTime(h, m) },
+                            calendar.get(Calendar.HOUR_OF_DAY),
+                            calendar.get(Calendar.MINUTE),
+                            false
+                        ).show()
+                    }
+                )
             }
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -195,12 +243,15 @@ fun CreateEventScreen(navController: NavController, viewModel: CreateEventViewMo
             TextFieldSection(
                 label = "Location",
                 value = locationQuery,
-                onValueChange = {
-                    locationQuery = it
-                    showDropdown = locationQuery.length >= 4 && locationSuggestions.isNotEmpty()
+                onValueChange = { newQuery ->
+                    locationQuery = newQuery
+                    viewModel.updateIsLocationValid(false)
+                    showDropdown = newQuery.length >= 4 && locationSuggestions.isNotEmpty()
                 },
                 placeholder = "Search"
             )
+
+
 
             if (showDropdown) {
                 Card(
@@ -215,6 +266,7 @@ fun CreateEventScreen(navController: NavController, viewModel: CreateEventViewMo
                                     .fillMaxWidth()
                                     .clickable {
                                         showDropdown = false
+                                        viewModel.updateIsLocationValid(true)
                                         viewModel.updateLocation(address)
                                         locationQuery = address
                                     }
