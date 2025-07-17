@@ -97,8 +97,11 @@ object Repository {
     }
 
     fun formatDateRangeString(dates: Pair<Date, Date>): String {
-        val formatter = SimpleDateFormat("MMMM d", Locale.getDefault()) // e.g. July 13
+        Calendar.getInstance().apply { time = dates.second }.get(Calendar.YEAR)
+
+        val formatter = SimpleDateFormat("MMM d, yyyy", Locale.getDefault())
         return "${formatter.format(dates.first)} – ${formatter.format(dates.second)}"
+
     }
 
     private val allEvents = mutableListOf<EventDetails>(
