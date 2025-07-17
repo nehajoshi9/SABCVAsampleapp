@@ -49,16 +49,13 @@ fun CalendarScreen(navController: NavController) {
     viewModel.refreshEvents()
     val events by viewModel.events.collectAsState()
     var searchQuery by remember { mutableStateOf("") }
-    var filteredEvents by remember { mutableStateOf(events) }
     val selectedFilter = viewModel.selectedFilter.collectAsState().value
     val currentRange = viewModel.getCurrentDateRange()
     val repository = Repository
 
-    LaunchedEffect(events, searchQuery, currentRange) {
-        filteredEvents = events.filter {
+    val filteredEvents = events.filter {
             it.title.contains(searchQuery, ignoreCase = true) && Repository.isDateInRangeInclusive(it.startDate, currentRange)
         }
-    }
 
     Scaffold(
         bottomBar = { BottomNavigationBar(selectedTab = "Calendar") }
@@ -170,9 +167,6 @@ fun CalendarScreen(navController: NavController) {
                             else repository.removeAttendee(event.id, "YN")
                             viewModel.loadEvent(event.id)
                             viewModel.refreshEvents()
-                            filteredEvents = viewModel.events.value.filter {
-                                it.title.contains(searchQuery, ignoreCase = true)
-                            }
                         }
                     )
                 }
