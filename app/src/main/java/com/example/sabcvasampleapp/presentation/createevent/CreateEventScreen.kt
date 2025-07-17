@@ -38,6 +38,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import kotlinx.coroutines.launch
 import java.util.*
+import com.example.sabcvasampleapp.presentation.eventdetails.BadgeWithSquare
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class,
     ExperimentalLayoutApi::class
@@ -250,7 +251,6 @@ fun CreateEventScreen(navController: NavController, viewModel: CreateEventViewMo
                 },
                 placeholder = "Search"
             )
-
 
 
             if (showDropdown) {
