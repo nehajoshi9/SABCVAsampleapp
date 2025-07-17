@@ -25,7 +25,7 @@ class MainActivity : ComponentActivity() {
             SABCVASampleAppTheme {
                 val navController = rememberNavController()
                 Surface(modifier = Modifier.fillMaxSize()) {
-                    NavHost(navController = navController, startDestination = "create_post") {
+                    NavHost(navController = navController, startDestination = "calendar") {
                         composable("calendar") {
                             CalendarScreen(navController)
                         }

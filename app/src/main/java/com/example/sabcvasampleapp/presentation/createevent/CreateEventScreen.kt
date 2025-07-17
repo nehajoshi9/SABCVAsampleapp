@@ -3,7 +3,6 @@ package com.example.sabcvasampleapp.presentation.createevent
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
 import android.content.Intent
-import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
@@ -12,7 +11,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import com.example.sabcvasampleapp.presentation.data.EventRepository
+import com.example.sabcvasampleapp.resources.Repository
 import androidx.compose.foundation.relocation.BringIntoViewRequester
 import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.foundation.rememberScrollState
@@ -31,8 +30,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.TextFieldValue
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -78,13 +75,13 @@ fun CreateEventScreen(navController: NavController, viewModel: CreateEventViewMo
     var coHostQuery by remember { mutableStateOf("") }
     var sponsorQuery by remember { mutableStateOf("") }
 
-    val locationSuggestions = EventRepository.allAddresses.filter {
+    val locationSuggestions = Repository.allAddresses.filter {
         it.contains(locationQuery, ignoreCase = true)
     }
-    val cohostSuggestions = EventRepository.allProfiles.filter {
+    val cohostSuggestions = Repository.allProfiles.filter {
         it.contains(coHostQuery, ignoreCase = true) && !invitedCoHosts.contains(it)
     }
-    val sponsorSuggestions = EventRepository.allBusinessProfiles.filter {
+    val sponsorSuggestions = Repository.allBusinessProfiles.filter {
         it.contains(sponsorQuery, ignoreCase = true) && !invitedSponsors.contains(it)
     }
 

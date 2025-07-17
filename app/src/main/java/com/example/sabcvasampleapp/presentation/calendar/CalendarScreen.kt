@@ -3,7 +3,7 @@ package com.example.sabcvasampleapp.presentation.calendar
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.collectAsState
-import com.example.sabcvasampleapp.presentation.data.EventDetails
+import com.example.sabcvasampleapp.resources.EventDetails
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -17,7 +17,6 @@ import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Send
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -28,13 +27,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.example.sabcvasampleapp.presentation.data.EventRepository
+import com.example.sabcvasampleapp.resources.Repository
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CalendarScreen(navController: NavController) {
@@ -83,7 +81,7 @@ fun CalendarScreen(navController: NavController) {
             )
 
             Text(
-                text = "June 12 - June 18",
+                text = "July 13 - July 19",
                 modifier = Modifier
                     .align(Alignment.CenterHorizontally)
                     .padding(top = 4.dp),
@@ -134,7 +132,7 @@ fun CalendarScreen(navController: NavController) {
                             navController.navigate("event/$id")
                         },
                         onRSVP = {
-                            EventRepository.addAttendee(event.id, "YN")
+                            Repository.addAttendee(event.id, "YN")
                             viewModel.loadEvent(event.id)
                             viewModel.refreshEvents()
                             filteredEvents = viewModel.events.value.filter {
@@ -181,7 +179,7 @@ fun EventCard(
         Column(modifier = Modifier.padding(16.dp)) {
             Text(event.title, fontWeight = FontWeight.Bold, fontSize = 16.sp)
             Spacer(modifier = Modifier.height(4.dp))
-            Text(event.date, fontSize = 14.sp, color = Color.Gray)
+            Text(Repository.formatEventDateRange(event.startDate, event.endDate), fontSize = 14.sp, color = Color.Gray)
             Spacer(modifier = Modifier.height(4.dp))
             Text(event.description, fontSize = 14.sp, color = Color.DarkGray)
             Spacer(modifier = Modifier.height(4.dp))

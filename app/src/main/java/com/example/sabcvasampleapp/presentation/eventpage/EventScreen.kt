@@ -24,15 +24,15 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.example.sabcvasampleapp.presentation.data.EventDetails
-import com.example.sabcvasampleapp.presentation.data.EventRepository
+import com.example.sabcvasampleapp.resources.EventDetails
+import com.example.sabcvasampleapp.resources.Repository
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EventScreen(navController: NavController, eventId: String) {
     val context = LocalContext.current
     val viewModel: EventViewModel = viewModel()
-    val repository = EventRepository
+    val repository = Repository
     val event: EventDetails? by viewModel.event.collectAsState()
 
     LaunchedEffect(eventId) {
@@ -60,7 +60,7 @@ fun EventScreen(navController: NavController, eventId: String) {
 
                 IconButton(
                     onClick = {
-                        val shareText = "Check out this event: ${e.title}\n${e.date}\n${e.location}"
+                        val shareText = "Check out this event: ${e.title}\n${Repository.formatEventDateRange(e.startDate, e.endDate)}\n${e.location}"
                         val shareIntent = Intent().apply {
                             action = Intent.ACTION_SEND
                             putExtra(Intent.EXTRA_TEXT, shareText)
@@ -92,7 +92,7 @@ fun EventScreen(navController: NavController, eventId: String) {
             ) {
                 item {
                     Spacer(modifier = Modifier.height(16.dp))
-                    Text(e.date, fontSize = 14.sp, color = Color.Gray)
+                    Text(Repository.formatEventDateRange(e.startDate, e.endDate), fontSize = 14.sp, color = Color.Gray)
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(e.title, fontSize = 20.sp, fontWeight = FontWeight.Bold)
                     Spacer(modifier = Modifier.height(8.dp))
@@ -105,7 +105,7 @@ fun EventScreen(navController: NavController, eventId: String) {
                     Spacer(modifier = Modifier.height(16.dp))
                     InfoCardWithIcon(e.location, "Tap for directions", Icons.Default.Place)
                     Spacer(modifier = Modifier.height(8.dp))
-                    InfoCardWithIcon(e.date, "Add to calendar", Icons.Default.DateRange)
+                    InfoCardWithIcon(Repository.formatEventDateRange(e.startDate, e.endDate), "Add to calendar", Icons.Default.DateRange)
 
                     Spacer(modifier = Modifier.height(16.dp))
                     Text("About this event", fontWeight = FontWeight.Bold, fontSize = 16.sp)
