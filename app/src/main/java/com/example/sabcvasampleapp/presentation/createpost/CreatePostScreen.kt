@@ -75,7 +75,7 @@ fun CreatePostScreen(
             placeholder = "Enter your post title here..."
         )
 
-        Spacer(modifier = Modifier.height(20.dp))
+        Spacer(modifier = Modifier.height(16.dp))
 
         TextFieldSection(
             label = "Description",
@@ -85,7 +85,17 @@ fun CreatePostScreen(
             isMultiline = true
         )
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Text(
+            text = "Add Media (Optional)",
+            fontSize = 16.sp,
+            fontWeight = FontWeight.Medium,
+            color = Color.Black,
+            modifier = Modifier.padding(horizontal = 20.dp, vertical = 4.dp)
+        )
+
+        Spacer(modifier = Modifier.height(4.dp))
 
         Box(
             modifier = Modifier
@@ -121,7 +131,7 @@ fun CreatePostScreen(
             }
         }
 
-        Spacer(modifier = Modifier.height(32.dp))
+        Spacer(modifier = Modifier.height(28.dp))
 
         Row(
             horizontalArrangement = Arrangement.SpaceBetween,
