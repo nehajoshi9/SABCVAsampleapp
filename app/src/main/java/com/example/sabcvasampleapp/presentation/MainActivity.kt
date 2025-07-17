@@ -1,5 +1,5 @@
 // --- MainActivity.kt ---
-package com.example.sabcvasampleapp
+package com.example.sabcvasampleapp.presentation
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -25,7 +25,7 @@ class MainActivity : ComponentActivity() {
             SABCVASampleAppTheme {
                 val navController = rememberNavController()
                 Surface(modifier = Modifier.fillMaxSize()) {
-                    NavHost(navController = navController, startDestination = "create_event") {
+                    NavHost(navController = navController, startDestination = "calendar") {
                         composable("calendar") {
                             CalendarScreen(navController)
                         }

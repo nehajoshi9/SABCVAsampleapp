@@ -136,7 +136,7 @@ fun EventScreen(navController: NavController, eventId: String) {
                             ) {
                                 Text(
                                     text = initial,
-                                    color = if (isExtra) Color(0xFFB00020) else Color.Black,
+                                    color = if (isExtra) Color(0xFF388E3C) else Color.Black,
                                     fontSize = 12.sp,
                                     fontWeight = FontWeight.Bold
                                 )
@@ -162,11 +162,13 @@ fun EventScreen(navController: NavController, eventId: String) {
 
                     var commentText by remember { mutableStateOf("") }
 
-                    TextField(
+                    OutlinedTextField(
                         value = commentText,
                         onValueChange = { commentText = it },
                         placeholder = { Text("Add a comment...") },
-                        modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 8.dp),
                         trailingIcon = {
                             if (commentText.isNotBlank()) {
                                 IconButton(onClick = {
@@ -177,7 +179,7 @@ fun EventScreen(navController: NavController, eventId: String) {
                                     Icon(
                                         imageVector = Icons.Outlined.Send,
                                         contentDescription = "Send",
-                                        tint = Color(0xFFB00020)
+                                        tint = Color(0xFF2596be)
                                     )
                                 }
                             }
@@ -250,7 +252,7 @@ fun VerticalOvalIconBox(icon: ImageVector) {
     Box(
         modifier = Modifier
             .size(width = 30.dp, height = 40.dp)
-            .background(Color(0xFFB00020), shape = RoundedCornerShape(50)),
+            .background(Color(0xFF2596be), shape = RoundedCornerShape(50)),
         contentAlignment = Alignment.Center
     ) {
         Icon(

@@ -454,7 +454,83 @@ fun CreateEventScreen(navController: NavController, viewModel: CreateEventViewMo
                 }
             }
 
+            Spacer(modifier = Modifier.height(16.dp))
 
+
+            AccordionCard(false, false, "Tags (Optional)", Icons.Default.Tag) { /*
+                val bringIntoViewRequester = remember { BringIntoViewRequester() }
+
+                TextFieldSection(false, "Add a tag", tagQuery, { tagQuery = it }, "Type and press enter")
+
+// Handle "Enter" or done button to add custom tag
+                LaunchedEffect(tagQuery) {
+                    if (tagQuery.endsWith("\n")) {
+                        val cleaned = tagQuery.trim()
+                        if (cleaned.isNotEmpty() && !selectedTags.contains(cleaned)) {
+                            viewModel.addTag(cleaned)
+                        }
+                        tagQuery = ""
+                    }
+                }
+
+// Suggestions (optional UI)
+                if (tagQuery.isNotBlank() && tagSuggestions.isNotEmpty()) {
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(8.dp)
+                    ) {
+                        Column(modifier = Modifier.padding(8.dp)) {
+                            tagSuggestions.forEach { tag ->
+                                Text(
+                                    text = tag,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .clickable {
+                                            viewModel.addTag(tag)
+                                            tagQuery = ""
+                                        }
+                                        .bringIntoViewRequester(bringIntoViewRequester)
+                                        .onFocusChanged {
+                                            if (it.isFocused) {
+                                                coroutineScope.launch {
+                                                    bringIntoViewRequester.bringIntoView()
+                                                }
+                                            }
+                                        }
+                                        .padding(vertical = 8.dp)
+                                )
+                            }
+                        }
+                    }
+                }
+
+                FlowRow(modifier = Modifier.padding(top = 8.dp)) {
+                    selectedTags.forEach { tag ->
+                        Surface(
+                            color = Color(0xFFE0E0E0),
+                            shape = RoundedCornerShape(50),
+                            modifier = Modifier.padding(end = 4.dp)
+                        ) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+                            ) {
+                                Text(text = tag, fontSize = 14.sp)
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Icon(
+                                    imageVector = Icons.Default.Close,
+                                    contentDescription = "Remove",
+                                    modifier = Modifier
+                                        .size(16.dp)
+                                        .clickable { viewModel.removeTag(tag) }
+                                )
+                            }
+                        }
+                    }
+                }
+
+*/
+            }
 
         }
     }

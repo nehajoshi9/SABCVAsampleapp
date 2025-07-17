@@ -48,6 +48,8 @@ object Repository {
         "This Month" to ::getThisMonthRange
     )
 
+
+
     fun getNextWeekRange(): Pair<Date, Date> {
         val (thisWeekStart, _) = getThisWeekRange()
 

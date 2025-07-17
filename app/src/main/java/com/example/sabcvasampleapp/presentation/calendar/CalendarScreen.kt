@@ -68,28 +68,47 @@ fun CalendarScreen(navController: NavController) {
                         color = Color.Black
                     )
                 },
-                navigationIcon = {
-                    IconButton(onClick = { /* Optional back */ }) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = null, tint = Color.Gray)
-                    }
-                },
-                actions = {
-                    IconButton(onClick = { /* Optional forward */ }) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = null, tint = Color.Gray, modifier = Modifier.rotate(180f))
-                    }
-                },
+
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = Color.White)
 
             )
 
-            Text(
-                text = Repository.formatDateRangeString(Repository.dateRangeMap[selectedFilter]!!.invoke()),
+            Row(
                 modifier = Modifier
-                    .align(Alignment.CenterHorizontally)
-                    .padding(top = 4.dp),
-                style = MaterialTheme.typography.titleSmall,
-                color = Color.Gray
-            )
+                    .fillMaxWidth()
+                    .padding(horizontal = 32.dp, vertical = 8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                IconButton(onClick = { /* Optional back */ }) {
+                    Icon(
+                        imageVector = Icons.Default.ArrowBack,
+                        contentDescription = "Previous",
+                        tint = Color.Gray
+                    )
+                }
+
+                Text(
+                    text = Repository.formatDateRangeString(Repository.dateRangeMap[selectedFilter]!!.invoke()),
+                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Medium),
+                    color = Color.Gray,
+                    modifier = Modifier
+                        .padding(horizontal = 8.dp)
+                        .weight(1f)
+                        .wrapContentWidth(Alignment.CenterHorizontally)
+                )
+
+                IconButton(onClick = { /* Optional forward */ }) {
+                    Icon(
+                        imageVector = Icons.Default.ArrowBack,
+                        contentDescription = "Next",
+                        tint = Color.Gray,
+                        modifier = Modifier.rotate(180f)
+                    )
+                }
+            }
+
+
 
             Spacer(modifier = Modifier.height(12.dp))
 
