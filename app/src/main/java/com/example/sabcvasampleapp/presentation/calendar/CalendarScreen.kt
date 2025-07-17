@@ -35,6 +35,11 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.sabcvasampleapp.presentation.eventdetails.BadgeWithSquare
 import com.example.sabcvasampleapp.resources.Repository
+import androidx.compose.foundation.Image
+import androidx.compose.ui.layout.ContentScale
+import coil.compose.rememberAsyncImagePainter
+import androidx.compose.ui.graphics.Brush
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CalendarScreen(navController: NavController) {
@@ -202,22 +207,41 @@ fun EventCard(
         colors = CardDefaults.cardColors(containerColor = Color(0xFFF9F9F9)),
         shape = RoundedCornerShape(12.dp)
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            // 👇 Attendee count pill
-            Row(
+        Column(modifier = Modifier.fillMaxWidth()) {
+            // 🖼 Image with rounded top corners
+            val imageUrl = "https://picsum.photos/600/300"
+            Image(
+                painter = rememberAsyncImagePainter(model = imageUrl),
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .wrapContentWidth(Alignment.End) // 👈 push to the right
-            ) {
-                BadgeWithSquare("${event.attendees.size} attending", Color(0xFFF2F2F2), Color(0xFF388E3C))
-            }
-            //BadgeWithSquare("${event.attendees.size} attending", Color(0xFFF2F2F2), Color(0xFF388E3C))
+                    .height(100.dp)
+                    .clip(RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp))
+            )
 
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(event.title, fontWeight = FontWeight.Bold, fontSize = 16.sp)
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(Repository.formatEventDateRange(event.startDate, event.endDate), fontSize = 14.sp, color = Color.Gray)
-            Spacer(modifier = Modifier.height(4.dp))
+            // 💬 Content section with padding
+            Column(modifier = Modifier.padding(16.dp)) {
+                // 👤 Attendee pill (not touching image)
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .wrapContentWidth(Alignment.End)
+                ) {
+                    BadgeWithSquare("${event.attendees.size} attending", Color(0xFFF2F2F2), Color(0xFF388E3C))
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(event.title, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    Repository.formatEventDateRange(event.startDate, event.endDate),
+                    fontSize = 14.sp,
+                    color = Color.Gray
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(event.description, fontSize = 14.sp, color = Color.DarkGray)
+                Spacer(modifier = Modifier.height(4.dp))
             Text(event.description, fontSize = 14.sp, color = Color.DarkGray)
             Spacer(modifier = Modifier.height(4.dp))
             Text(event.location, fontSize = 12.sp, color = Color.Gray)
@@ -233,6 +257,7 @@ fun EventCard(
         }
     }
 }
+    }
 
 @Composable
 fun BottomNavigationBar(selectedTab: String) {
