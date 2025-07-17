@@ -27,6 +27,7 @@ import androidx.navigation.NavController
 import com.example.sabcvasampleapp.resources.EventDetails
 import com.example.sabcvasampleapp.resources.Repository
 import androidx.compose.foundation.Image
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import coil.compose.rememberAsyncImagePainter
 
@@ -48,19 +49,20 @@ fun EventScreen(navController: NavController, eventId: String) {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(160.dp)
+                    .height(200.dp)
                     .background(Brush.verticalGradient(colors = listOf(Color(0xFF430C49), Color(0xFFB00020))))
             ) {
 
                 val imageUrl = "https://picsum.photos/600/300"
-                if (imageUrl != null) {
-                    Image(
-                        painter = rememberAsyncImagePainter(model = imageUrl),
-                        contentDescription = null,
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier.fillMaxSize()
-                    )
-                }
+                Image(
+                    rememberAsyncImagePainter(model = e.image ?: imageUrl),
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(250.dp)
+                        .clip(RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp))
+                )
 
                 IconButton(
                     onClick = { navController.popBackStack() },
@@ -167,7 +169,9 @@ fun EventScreen(navController: NavController, eventId: String) {
                         }
                     }
 
-                    Spacer(modifier = Modifier.height(16.dp))
+                    if(e.attendees.isNotEmpty()) {
+                        Spacer(modifier = Modifier.height(16.dp))
+                    }
 
                     Button(
                         onClick = {
@@ -181,7 +185,7 @@ fun EventScreen(navController: NavController, eventId: String) {
                         Text("RSVP Now", fontSize = 16.sp, color = Color.White)
                     }
 
-                    Spacer(modifier = Modifier.height(24.dp))
+                    Spacer(modifier = Modifier.height(8.dp))
 
                     var commentText by remember { mutableStateOf("") }
 

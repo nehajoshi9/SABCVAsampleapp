@@ -3,6 +3,7 @@ package com.example.sabcvasampleapp.presentation.createevent
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
 import android.content.Intent
+import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
@@ -148,13 +149,16 @@ fun CreateEventScreen(navController: NavController, viewModel: CreateEventViewMo
                                 startDateCal.set(Calendar.SECOND, startTimeCal.get(Calendar.SECOND))
                                 startDateCal.set(Calendar.MILLISECOND, startTimeCal.get(Calendar.MILLISECOND))
 
-                                val endDateCal = startDateCal.clone() as Calendar
+                                val endDateCal = Calendar.getInstance().apply { time = eventDate }
                                 endDateCal.set(Calendar.HOUR_OF_DAY, endTimeCal.get(Calendar.HOUR_OF_DAY))
                                 endDateCal.set(Calendar.MINUTE, endTimeCal.get(Calendar.MINUTE))
                                 endDateCal.set(Calendar.SECOND, endTimeCal.get(Calendar.SECOND))
                                 endDateCal.set(Calendar.MILLISECOND, endTimeCal.get(Calendar.MILLISECOND))
 
-                                Repository.addEvent(eventTitle, startDateCal.time, endDateCal.time, eventLocation, eventDescription, invitedCoHosts)
+                                Log.d("DEBUG", "Start time: ${startTime}")
+                                Log.d("DEBUG", "End time: ${endTime}")
+
+                                Repository.addEvent(eventTitle, startDateCal.time, endDateCal.time, eventLocation, eventDescription, invitedCoHosts, selectedFileUri)
                                 navController.navigate("calendar")
                                 // Publish
                             }
@@ -316,7 +320,7 @@ fun CreateEventScreen(navController: NavController, viewModel: CreateEventViewMo
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
-                            text = if (selectedFileUri != null) "File Selected" else "Click to upload or drag and drop",
+                            text = if (selectedFileUri != null) "File Selected" else "Click to upload",
                             color = if (selectedFileUri != null) Color(0xFF4CAF50) else Color(0xFFe30029)
                         )
                         Text(
@@ -333,7 +337,7 @@ fun CreateEventScreen(navController: NavController, viewModel: CreateEventViewMo
             AccordionCard(false, true, "Hosts", Icons.Default.People) {
                 val bringIntoViewRequester = remember { BringIntoViewRequester() }
 
-                TextFieldSection(true, "Search for a co-host", coHostQuery, { coHostQuery = it }, "Search")
+                TextFieldSection(true, "Search for a host", coHostQuery, { coHostQuery = it }, "Search")
 
                 if (coHostQuery.isNotBlank() && cohostSuggestions.isNotEmpty()) {
                     Card(

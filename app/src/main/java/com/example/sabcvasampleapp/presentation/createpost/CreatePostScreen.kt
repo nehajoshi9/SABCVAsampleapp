@@ -110,7 +110,7 @@ fun CreatePostScreen(
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    text = if (selectedFileUri != null) "File Selected" else "Click to upload or drag and drop",
+                    text = if (selectedFileUri != null) "File Selected" else "Click to upload",
                     color = if (selectedFileUri != null) Color(0xFF4CAF50) else Color(0xFFe30029)
                 )
                 Text(

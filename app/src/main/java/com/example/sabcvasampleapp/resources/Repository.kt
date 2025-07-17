@@ -1,5 +1,6 @@
 package com.example.sabcvasampleapp.resources
 
+import android.net.Uri
 import java.util.Calendar
 import java.text.SimpleDateFormat
 import java.util.*
@@ -80,7 +81,7 @@ object Repository {
 
         val dayPart = dayFormat.format(start)
         val startTime = getFormattedTime(start)
-        val endTime = getFormattedTime(start)
+        val endTime = getFormattedTime(end)
 
         return "$dayPart • $startTime – $endTime"
     }
@@ -177,8 +178,8 @@ object Repository {
         }
     }
 
-    fun addEvent(title: String, startDate: Date, endDate: Date, location: String, description: String, cohosts: List<String>) {
-        allEvents.add(EventDetails(UUID.randomUUID().toString(), title, startDate, endDate, location, description, listOf(), cohosts, listOf()))
+    fun addEvent(title: String, startDate: Date, endDate: Date, location: String, description: String, cohosts: List<String>, image: Uri? = null) {
+        allEvents.add(EventDetails(UUID.randomUUID().toString(), title, startDate, endDate, location, description, listOf(), cohosts, listOf(), image))
     }
 
    /* fun removeEvent(eventId: String) {

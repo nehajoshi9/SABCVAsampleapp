@@ -1,5 +1,6 @@
 // 1. Classes.kt
 package com.example.sabcvasampleapp.resources
+import android.net.Uri
 import java.util.Date
 
 data class EventDetails(
@@ -11,7 +12,8 @@ data class EventDetails(
     val description: String,
     val attendees: List<String> = listOf(),
     val hosts: List<String> = listOf(),
-    val comments: List<Comment> = listOf()
+    val comments: List<Comment> = listOf(),
+    val image: Uri? = null
 )
 
 data class Comment(

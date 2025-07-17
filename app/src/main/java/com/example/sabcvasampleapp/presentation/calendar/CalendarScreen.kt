@@ -211,7 +211,7 @@ fun EventCard(
             // 🖼 Image with rounded top corners
             val imageUrl = "https://picsum.photos/600/300"
             Image(
-                painter = rememberAsyncImagePainter(model = imageUrl),
+                rememberAsyncImagePainter(model = if (event.image != null) event.image else imageUrl),
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
@@ -242,8 +242,6 @@ fun EventCard(
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(event.description, fontSize = 14.sp, color = Color.DarkGray)
                 Spacer(modifier = Modifier.height(4.dp))
-            Text(event.description, fontSize = 14.sp, color = Color.DarkGray)
-            Spacer(modifier = Modifier.height(4.dp))
             Text(event.location, fontSize = 12.sp, color = Color.Gray)
             Spacer(modifier = Modifier.height(12.dp))
             Button(
