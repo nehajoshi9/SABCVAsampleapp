@@ -116,19 +116,25 @@ object Repository {
             comments = listOf(
                 Comment("John Doe", "Looking forward to this event!", 1751992800000),
                 Comment("Alice Kim", "Can't wait to join.", 1751820000000)
-            ), hosts = listOf("Alice Johnson", "Google", "Carmen Reyes")
+            ),
+            hosts = listOf("Alex Johnson", "Taylor Smith", "Morgan Reyes", "Jamie Lee", "Chris Evans"),
+            sponsors = listOf("Adobe", "Figma"),
+            tags = listOf("Design", "UX", "Workshop")
         ),
         EventDetails(
             id = UUID.randomUUID().toString(),
             title = "Tech Conference 2025",
             startDate = buildDate(2025, Calendar.JULY, 22, 9, 0),
-            endDate = buildDate(2025, Calendar.JULY, 18, 17, 0),
+            endDate = buildDate(2025, Calendar.JULY, 22, 17, 0), // fixed the endDate which was accidentally set earlier
             location = "Downtown Convention Center",
             description = "Biggest tech event of the year with industry experts.",
             attendees = listOf("SP", "LK", "AB"),
             comments = listOf(
                 Comment("Raj Patel", "Super hyped!", 1751873800000)
-            ), hosts = listOf("Eva Patel")
+            ),
+            hosts = listOf("Eva Patel"),
+            sponsors = listOf("Google", "Microsoft", "OpenAI"),
+            tags = listOf("Tech", "AI", "Networking")
         )
     )
 

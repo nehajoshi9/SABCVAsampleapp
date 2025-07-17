@@ -13,6 +13,7 @@ import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.Send
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -27,9 +28,15 @@ import androidx.navigation.NavController
 import com.example.sabcvasampleapp.neha.resources.EventDetails
 import com.example.sabcvasampleapp.neha.resources.Repository
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.outlined.LocalOffer
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.style.TextOverflow
 import coil.compose.rememberAsyncImagePainter
+import com.example.sabcvasampleapp.neha.ui.theme.BubbleColors
 import com.example.sabcvasampleapp.neha.ui.theme.DefaultEventGradients
 import java.lang.Math.abs
 
@@ -47,7 +54,9 @@ fun EventScreen(navController: NavController, eventId: String) {
     }
 
     event?.let { e ->
-        Column(modifier = Modifier.fillMaxSize().background(Color.White)) {
+        Column(modifier = Modifier
+            .fillMaxSize()
+            .background(Color.White)) {
             val gradientIndex = abs(e.id.hashCode()) % DefaultEventGradients.size
             val fallbackGradient = DefaultEventGradients[gradientIndex]
             Box(
@@ -116,7 +125,9 @@ fun EventScreen(navController: NavController, eventId: String) {
             }
 
             LazyColumn(
-                modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 16.dp),
                 contentPadding = PaddingValues(bottom = 32.dp)
             ) {
                 item {
@@ -148,7 +159,9 @@ fun EventScreen(navController: NavController, eventId: String) {
 
                 item {
                     Row(
-                        modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 8.dp),
                         horizontalArrangement = Arrangement.Start
                     ) {
                         val extra = e.attendees.size > 7
@@ -160,7 +173,10 @@ fun EventScreen(navController: NavController, eventId: String) {
                                 modifier = Modifier
                                     .padding(end = 8.dp)
                                     .size(36.dp)
-                                    .background(if (isExtra) Color(0xFFF2F2F2) else Color.LightGray, shape = CircleShape),
+                                    .background(
+                                        if (isExtra) Color(0xFFF2F2F2) else Color.LightGray,
+                                        shape = CircleShape
+                                    ),
                                 contentAlignment = Alignment.Center
                             ) {
                                 Text(
@@ -176,6 +192,50 @@ fun EventScreen(navController: NavController, eventId: String) {
                     if(e.attendees.isNotEmpty()) {
                         Spacer(modifier = Modifier.height(16.dp))
                     }
+
+                    Text("Hosts", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    LazyRow(
+                        horizontalArrangement = Arrangement.spacedBy(16.dp),
+                        contentPadding = PaddingValues(horizontal = 16.dp)
+                    ) {
+                        items(e.hosts) { host ->
+                            HostCard(
+                                name = host,
+                                isBusiness = false,
+                                imageUrl = null,
+                                color = BubbleColors[abs(host.hashCode()) % BubbleColors.size]
+                            )
+                        }
+                    }
+
+                    if(e.sponsors.isNotEmpty()) {
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Text("Sponsors", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                        Spacer(modifier = Modifier.height(16.dp))
+                        LazyRow(
+                            horizontalArrangement = Arrangement.spacedBy(16.dp),
+                            contentPadding = PaddingValues(horizontal = 16.dp)
+                        ) {
+                            items(e.sponsors) { host ->
+                                HostCard(
+                                    name = host,
+                                    isBusiness = false,
+                                    imageUrl = null,
+                                    color = BubbleColors[abs(host.hashCode()) % BubbleColors.size]
+                                )
+                            }
+                        }
+                    }
+                    if(e.tags.isNotEmpty()) {
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Text("Tags", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                        Spacer(modifier = Modifier.height(16.dp))
+                        TagSection(e.tags)
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
 
                     Button(
                         onClick = {
@@ -335,5 +395,94 @@ fun BadgeWithSquare(text: String, bgColor: Color, textColor: Color) {
         )
         Spacer(modifier = Modifier.width(6.dp))
         Text(text, color = textColor, fontSize = 12.sp)
+    }
+}
+
+@Composable
+fun HostCard(name: String, isBusiness: Boolean, imageUrl: String?, color: Color = Color(0xFFB00020)) {
+    Box(modifier = Modifier
+        .background(Color(0xFFF9F9F9), shape = RoundedCornerShape(12.dp))
+        .padding(16.dp)
+        .height(100.dp)
+        .clickable { // navigate to their profile
+             }
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.width(100.dp)
+        ) {
+            if (imageUrl != null) {
+                Image(
+                    painter = rememberAsyncImagePainter(imageUrl),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .size(49.dp)
+                        .clip(CircleShape),
+                    contentScale = ContentScale.Crop
+                )
+            } else {
+                Box(
+                    modifier = Modifier
+                        .size(49.dp)
+                        .clip(CircleShape)
+                        .background(color),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = name.split(" ").map { it.first().uppercase() }.joinToString(""),
+                        color = Color.White,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 20.sp
+                    )
+                }
+            }
+            Spacer(modifier = Modifier.height(6.dp))
+            Text(
+                text = name.capitalize(),
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Medium,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+            Text(
+                text = if (isBusiness) "Business" else "Person",
+                fontSize = 12.sp,
+                color = Color.DarkGray
+            )
+        }
+    }
+}
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+fun TagSection(tags: List<String>) {
+    FlowRow(
+        modifier = Modifier
+            .fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        tags.forEach { tag ->
+            Box(
+                modifier = Modifier
+                    .background(Color(0xFFF2F2F2), RoundedCornerShape(50))
+                    .padding(horizontal = 12.dp, vertical = 6.dp)
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        imageVector = Icons.Outlined.LocalOffer,
+                        contentDescription = "Tag Icon",
+                        tint = Color.Gray,
+                        modifier = Modifier.size(16.dp)
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text(
+                        text = tag,
+                        fontSize = 14.sp,
+                        color = Color.DarkGray
+                    )
+                }
+            }
+        }
     }
 }

@@ -43,6 +43,17 @@ val DefaultEventGradients = listOf(
     )
 )
 
+val BubbleColors = listOf(
+    Color(0xFFB00020), // Red
+    Color(0xFF4A148C), // Purple
+    Color(0xFF1A237E), // Navy
+    Color(0xFF4E342E), // Brown
+    Color(0xFF1B5E20), // Forest Green
+    Color(0xFF212121), // Charcoal
+    Color(0xFF6A1B9A), // Maroon
+    Color(0xFF00695C)  // Teal
+)
+
 private val DarkColorScheme = darkColorScheme(
     primary = SABCPrimary,
     secondary = SABCSecondary,

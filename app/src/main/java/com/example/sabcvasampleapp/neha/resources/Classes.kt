@@ -13,7 +13,9 @@ data class EventDetails(
     val attendees: List<String> = listOf(),
     val hosts: List<String> = listOf(),
     val comments: List<Comment> = listOf(),
-    val image: Uri? = null
+    val image: Uri? = null,
+    val sponsors: List<String> = listOf(),
+    val tags: List<String> = listOf()
 )
 
 data class Comment(
