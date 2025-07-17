@@ -1,6 +1,6 @@
 /* Updated EventScreen.kt with SABC theme colors */
 
-package com.example.sabcvasampleapp.presentation.eventdetails
+package com.example.sabcvasampleapp.neha.presentation.eventdetails
 
 import android.content.Intent
 import androidx.compose.foundation.background
@@ -24,12 +24,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.example.sabcvasampleapp.resources.EventDetails
-import com.example.sabcvasampleapp.resources.Repository
+import com.example.sabcvasampleapp.neha.resources.EventDetails
+import com.example.sabcvasampleapp.neha.resources.Repository
 import androidx.compose.foundation.Image
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import coil.compose.rememberAsyncImagePainter
+import com.example.sabcvasampleapp.neha.ui.theme.DefaultEventGradients
+import java.lang.Math.abs
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -46,23 +48,25 @@ fun EventScreen(navController: NavController, eventId: String) {
 
     event?.let { e ->
         Column(modifier = Modifier.fillMaxSize().background(Color.White)) {
+            val gradientIndex = abs(e.id.hashCode()) % DefaultEventGradients.size
+            val fallbackGradient = DefaultEventGradients[gradientIndex]
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(200.dp)
-                    .background(Brush.verticalGradient(colors = listOf(Color(0xFF430C49), Color(0xFFB00020))))
+                    .background(fallbackGradient)
             ) {
 
-                val imageUrl = "https://picsum.photos/600/300"
+                if (e.image != null) {
                 Image(
-                    rememberAsyncImagePainter(model = e.image ?: imageUrl),
+                    rememberAsyncImagePainter(model = e.image),
                     contentDescription = null,
                     contentScale = ContentScale.Crop,
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(250.dp)
                         .clip(RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp))
-                )
+                ) }
 
                 IconButton(
                     onClick = { navController.popBackStack() },

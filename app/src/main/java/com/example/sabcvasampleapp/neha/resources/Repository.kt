@@ -1,4 +1,4 @@
-package com.example.sabcvasampleapp.resources
+package com.example.sabcvasampleapp.neha.resources
 
 import android.net.Uri
 import java.util.Calendar
@@ -44,9 +44,9 @@ object Repository {
     }
 
     val dateRangeMap: Map<String, () -> Pair<Date, Date>> = mapOf(
-        "This Week" to ::getThisWeekRange,
-        "Next Week" to ::getNextWeekRange,
-        "This Month" to ::getThisMonthRange
+        "This Week" to Repository::getThisWeekRange,
+        "Next Week" to Repository::getNextWeekRange,
+        "This Month" to Repository::getThisMonthRange
     )
 
 
@@ -103,7 +103,7 @@ object Repository {
 
     private val allEvents = mutableListOf<EventDetails>(
         EventDetails(
-            id = "design",
+            id = UUID.randomUUID().toString(),
             title = "Design Workshop",
             startDate = buildDate(2025, Calendar.JULY, 17, 14, 0),
             endDate = buildDate(2025, Calendar.JULY, 17, 16, 0),
@@ -116,7 +116,7 @@ object Repository {
             )
         ),
         EventDetails(
-            id = "tech",
+            id = UUID.randomUUID().toString(),
             title = "Tech Conference 2023",
             startDate = buildDate(2025, Calendar.JULY, 22, 9, 0),
             endDate = buildDate(2025, Calendar.JULY, 18, 17, 0),

@@ -1,8 +1,8 @@
-package com.example.sabcvasampleapp.presentation.eventdetails
+package com.example.sabcvasampleapp.neha.presentation.eventdetails
 
 import androidx.lifecycle.ViewModel
-import com.example.sabcvasampleapp.resources.Repository
-import com.example.sabcvasampleapp.resources.EventDetails
+import com.example.sabcvasampleapp.neha.resources.Repository
+import com.example.sabcvasampleapp.neha.resources.EventDetails
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 

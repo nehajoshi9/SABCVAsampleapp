@@ -1,9 +1,9 @@
-package com.example.sabcvasampleapp.presentation.calendar
+package com.example.sabcvasampleapp.neha.presentation.calendar
 
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.collectAsState
-import com.example.sabcvasampleapp.resources.EventDetails
+import com.example.sabcvasampleapp.neha.resources.EventDetails
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -33,12 +33,14 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.example.sabcvasampleapp.presentation.eventdetails.BadgeWithSquare
-import com.example.sabcvasampleapp.resources.Repository
+import com.example.sabcvasampleapp.neha.presentation.eventdetails.BadgeWithSquare
+import com.example.sabcvasampleapp.neha.resources.Repository
 import androidx.compose.foundation.Image
 import androidx.compose.ui.layout.ContentScale
 import coil.compose.rememberAsyncImagePainter
 import androidx.compose.ui.graphics.Brush
+import com.example.sabcvasampleapp.neha.ui.theme.DefaultEventGradients
+import java.lang.Math.abs
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -209,17 +211,26 @@ fun EventCard(
     ) {
         Column(modifier = Modifier.fillMaxWidth()) {
             // 🖼 Image with rounded top corners
-            val imageUrl = "https://picsum.photos/600/300"
-            Image(
-                rememberAsyncImagePainter(model = if (event.image != null) event.image else imageUrl),
-                contentDescription = null,
-                contentScale = ContentScale.Crop,
+            val gradientIndex = abs(event.id.hashCode()) % DefaultEventGradients.size
+            val fallbackGradient = DefaultEventGradients[gradientIndex]
+            Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(100.dp)
-                    .clip(RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp))
-            )
+                    .height(120.dp)
+                    .background(fallbackGradient)
+            ) {
 
+                if (event.image != null) {
+                    Image(
+                        rememberAsyncImagePainter(model = event.image),
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp))
+                    )
+                }
+            }
             // 💬 Content section with padding
             Column(modifier = Modifier.padding(16.dp)) {
                 // 👤 Attendee pill (not touching image)

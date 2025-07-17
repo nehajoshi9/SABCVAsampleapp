@@ -1,4 +1,4 @@
-package com.example.sabcvasampleapp.presentation.createpost
+package com.example.sabcvasampleapp.neha.presentation.createpost
 
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult

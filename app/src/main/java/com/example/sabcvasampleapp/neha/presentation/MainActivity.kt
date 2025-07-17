@@ -1,5 +1,5 @@
 // --- MainActivity.kt ---
-package com.example.sabcvasampleapp.presentation
+package com.example.sabcvasampleapp.neha.presentation
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -11,11 +11,11 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.sabcvasampleapp.presentation.calendar.CalendarScreen
-import com.example.sabcvasampleapp.presentation.eventdetails.EventScreen
-import com.example.sabcvasampleapp.presentation.createevent.CreateEventScreen
-import com.example.sabcvasampleapp.ui.theme.SABCVASampleAppTheme
-import com.example.sabcvasampleapp.presentation.createpost.CreatePostScreen
+import com.example.sabcvasampleapp.neha.presentation.calendar.CalendarScreen
+import com.example.sabcvasampleapp.neha.presentation.eventdetails.EventScreen
+import com.example.sabcvasampleapp.neha.presentation.createevent.CreateEventScreen
+import com.example.sabcvasampleapp.neha.ui.theme.SABCVASampleAppTheme
+import com.example.sabcvasampleapp.neha.presentation.createpost.CreatePostScreen
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -25,7 +25,7 @@ class MainActivity : ComponentActivity() {
             SABCVASampleAppTheme {
                 val navController = rememberNavController()
                 Surface(modifier = Modifier.fillMaxSize()) {
-                    NavHost(navController = navController, startDestination = "create_post") {
+                    NavHost(navController = navController, startDestination = "create_event") {
                         composable("calendar") {
                             CalendarScreen(navController)
                         }
