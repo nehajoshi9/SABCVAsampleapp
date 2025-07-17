@@ -23,6 +23,7 @@ data class Comment(
 data class UserDetails(
     val name: String,
     val title: String,
+    val phone: Number,
     val id: Number
 )
 

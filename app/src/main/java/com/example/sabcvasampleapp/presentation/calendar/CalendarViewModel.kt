@@ -20,4 +20,11 @@ class CalendarViewModel : ViewModel() {
     fun refreshEvents() {
         _events.value = Repository.getAllEvents().toList()
     }
+
+    private val _selectedFilter = MutableStateFlow("This Week")
+    val selectedFilter: StateFlow<String> = _selectedFilter
+
+    fun updateFilter(newFilter: String) {
+        _selectedFilter.value = newFilter
+    }
 }

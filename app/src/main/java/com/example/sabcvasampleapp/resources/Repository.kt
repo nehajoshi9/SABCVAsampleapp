@@ -12,6 +12,51 @@ object Repository {
         }.time
     }
 
+    fun getThisWeekRange(): Pair<Date, Date> {
+        val calendar = Calendar.getInstance()
+
+        // Set to start of week (Sunday)
+        calendar.set(Calendar.DAY_OF_WEEK, calendar.firstDayOfWeek)
+
+        val startOfWeek = calendar.time
+
+        // Set to end of week (Saturday 11:59:59 PM)
+        calendar.add(Calendar.DAY_OF_WEEK, 6)
+
+        val endOfWeek = calendar.time
+
+        return Pair(startOfWeek, endOfWeek)
+    }
+
+    val dateRangeMap: Map<String, () -> Pair<Date, Date>> = mapOf(
+        "This Week" to ::getThisWeekRange,
+        "Next Week" to ::getNextWeekRange,
+        "This Month" to ::getThisMonthRange
+    )
+
+    fun getNextWeekRange(): Pair<Date, Date> {
+        val (thisWeekStart, _) = getThisWeekRange()
+
+        val start = Calendar.getInstance().apply {
+            time = thisWeekStart
+            add(Calendar.DAY_OF_YEAR, 7)
+        }
+        val end = (start.clone() as Calendar).apply {
+            add(Calendar.DAY_OF_WEEK, 6)
+        }
+
+        return Pair(start.time, end.time)
+    }
+
+    fun getThisMonthRange(): Pair<Date, Date> {
+        val start = Calendar.getInstance().apply {
+            set(Calendar.DAY_OF_MONTH, 1)
+        }
+        val end = Calendar.getInstance().apply {
+            set(Calendar.DAY_OF_MONTH, getActualMaximum(Calendar.DAY_OF_MONTH))
+        }
+        return Pair(start.time, end.time)
+    }
 
 
     fun formatEventDateRange(start: Date, end: Date): String {
@@ -23,6 +68,21 @@ object Repository {
         val endTime = timeFormat.format(end)
 
         return "$dayPart • $startTime – $endTime"
+    }
+
+    fun isDateInRangeInclusive(target: Date, range: Pair<Date, Date>): Boolean {
+        val dateOnlyFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+
+        val targetStr = dateOnlyFormat.format(target)
+        val startStr = dateOnlyFormat.format(range.first)
+        val endStr = dateOnlyFormat.format(range.second)
+
+        return targetStr >= startStr && targetStr <= endStr
+    }
+
+    fun formatDateRangeString(dates: Pair<Date, Date>): String {
+        val formatter = SimpleDateFormat("MMMM d", Locale.getDefault()) // e.g. July 13
+        return "${formatter.format(dates.first)} – ${formatter.format(dates.second)}"
     }
 
     private val allEvents = mutableListOf<EventDetails>(
@@ -42,7 +102,7 @@ object Repository {
         EventDetails(
             id = "tech",
             title = "Tech Conference 2023",
-            startDate = buildDate(2025, Calendar.JULY, 18, 9, 0),
+            startDate = buildDate(2025, Calendar.JULY, 22, 9, 0),
             endDate = buildDate(2025, Calendar.JULY, 18, 17, 0),
             location = "Downtown Convention Center",
             description = "Biggest tech event of the year with industry experts.",

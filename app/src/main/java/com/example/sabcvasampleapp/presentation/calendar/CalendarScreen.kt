@@ -41,10 +41,11 @@ fun CalendarScreen(navController: NavController) {
     val events by viewModel.events.collectAsState()
     var searchQuery by remember { mutableStateOf("") }
     var filteredEvents by remember { mutableStateOf(events) }
+    val selectedFilter = viewModel.selectedFilter.collectAsState().value
 
-    LaunchedEffect(events, searchQuery) {
+    LaunchedEffect(events, searchQuery, selectedFilter) {
         filteredEvents = events.filter {
-            it.title.contains(searchQuery, ignoreCase = true)
+            it.title.contains(searchQuery, ignoreCase = true) && Repository.isDateInRangeInclusive(it.startDate, Repository.dateRangeMap[selectedFilter]!!.invoke())
         }
     }
 
@@ -81,7 +82,7 @@ fun CalendarScreen(navController: NavController) {
             )
 
             Text(
-                text = "July 13 - July 19",
+                text = Repository.formatDateRangeString(Repository.dateRangeMap[selectedFilter]!!.invoke()),
                 modifier = Modifier
                     .align(Alignment.CenterHorizontally)
                     .padding(top = 4.dp),
@@ -116,9 +117,25 @@ fun CalendarScreen(navController: NavController) {
                     .padding(horizontal = 16.dp),
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
-                FilterChip("This Week", true)
-                FilterChip("Next Week", false)
-                FilterChip("This Month", false)
+                FilterChip(
+                    label = "This Week",
+                    selected = selectedFilter == "This Week",
+                    onClick = { viewModel.updateFilter("This Week") }
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+
+                FilterChip(
+                    label = "Next Week",
+                    selected = selectedFilter == "Next Week",
+                    onClick = { viewModel.updateFilter("Next Week") }
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+
+                FilterChip(
+                    label = "This Month",
+                    selected = selectedFilter == "This Month",
+                    onClick = { viewModel.updateFilter("This Month") }
+                )
             }
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -147,7 +164,7 @@ fun CalendarScreen(navController: NavController) {
 }
 
 @Composable
-fun FilterChip(label: String, selected: Boolean) {
+fun FilterChip(label: String, selected: Boolean, onClick: () -> Unit) {
     val background = if (selected) Color(0xFFB00020) else Color(0xFFE0E0E0)
     val textColor = if (selected) Color.White else Color.Black
 
@@ -155,7 +172,7 @@ fun FilterChip(label: String, selected: Boolean) {
         modifier = Modifier
             .clip(RoundedCornerShape(50))
             .background(background)
-            .clickable { }
+            .clickable { onClick() }
             .padding(horizontal = 16.dp, vertical = 8.dp)
     ) {
         Text(text = label, color = textColor, fontSize = 13.sp)
@@ -177,6 +194,21 @@ fun EventCard(
         shape = RoundedCornerShape(12.dp)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
+            // 👇 Attendee count pill
+            Box(
+                modifier = Modifier
+                    .background(Color(0xFFEEEEEE), shape = RoundedCornerShape(50))
+                    .padding(horizontal = 12.dp, vertical = 6.dp)
+                    .align(Alignment.End)
+            ) {
+                Text(
+                    text = "${event.attendees.size} attending",
+                    fontSize = 12.sp,
+                    color = Color.DarkGray
+                )
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
             Text(event.title, fontWeight = FontWeight.Bold, fontSize = 16.sp)
             Spacer(modifier = Modifier.height(4.dp))
             Text(Repository.formatEventDateRange(event.startDate, event.endDate), fontSize = 14.sp, color = Color.Gray)
