@@ -102,6 +102,8 @@ fun CreateEventScreen(navController: NavController, viewModel: CreateEventViewMo
     //val isValid = locationSuggestions.contains(locationQuery)
 
     if (showDialog) {
+        val errorList by viewModel.errors.collectAsState()
+
         BasicAlertDialog(
             onDismissRequest = { viewModel.resetValidationDialog() },
             content = {
@@ -113,17 +115,18 @@ fun CreateEventScreen(navController: NavController, viewModel: CreateEventViewMo
                         modifier = Modifier.padding(24.dp),
                         verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
-                        Text(
-                            "Please fill out all required fields",
-                            fontWeight = FontWeight.SemiBold
-                        )
+                        Text("Please fix the following:", fontWeight = FontWeight.SemiBold)
+
+                        errorList.forEach { error ->
+                            Text("• $error", color = Color(0xFFC50326))
+                        }
 
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.End
                         ) {
                             TextButton(onClick = { viewModel.resetValidationDialog() }) {
-                                Text("Ok")
+                                Text("OK")
                             }
                         }
                     }
@@ -319,6 +322,7 @@ fun CreateEventScreen(navController: NavController, viewModel: CreateEventViewMo
                 value = locationQuery,
                 onValueChange = { newQuery ->
                     locationQuery = newQuery
+                    viewModel.updateLocation(newQuery)
                     viewModel.updateIsLocationValid(false)
                     showDropdown = newQuery.length >= 4 && locationSuggestions.isNotEmpty()
                 },

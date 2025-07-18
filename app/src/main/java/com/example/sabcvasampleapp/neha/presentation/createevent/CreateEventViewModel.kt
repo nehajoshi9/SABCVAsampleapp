@@ -19,6 +19,7 @@ class CreateEventViewModel : ViewModel() {
     var sponsors = MutableStateFlow(listOf<String>())
     var fileUri = MutableStateFlow<Uri?>(null)
     var showDialog = MutableStateFlow(false)
+    var errors = MutableStateFlow(listOf<String>())
 
     var tags = MutableStateFlow(listOf<String>())
 
@@ -86,32 +87,22 @@ class CreateEventViewModel : ViewModel() {
         tags.value = tags.value - tag
     }
     fun isValid(): Boolean {
-        /*
-        val locationOk = isLocationValid.value
-        val titleOk = title.value.isNotBlank()
-        val descriptionOk = description.value.isNotBlank()
-        val dateOk = eventDate.value != null
-        val startTimeOk = startTime.value != null
-        val endTimeOk = endTime.value != null
-        val locationTextOk = location.value.isNotBlank()
-        val cohostsOk = cohosts.value.isNotEmpty()
+        val errorList = mutableListOf<String>()
 
-        println("isLocationValid: $locationOk")
-        println("title not blank: $titleOk")
-        println("description not blank: $descriptionOk")
-        println("date not null: $dateOk")
-        println("startTime not null: $startTimeOk")
-        println("endTime not null: $endTimeOk")
-        println("location text not blank: $locationTextOk")
-        println("cohosts not empty: $cohostsOk") */
+        if (title.value.isBlank()) errorList.add("Title is required.")
+        if (description.value.isBlank()) errorList.add("Description is required.")
+        if (eventDate.value == null) errorList.add("Date is required.")
+        if (startTime.value == null) errorList.add("Start time is required.")
+        if (endTime.value == null) errorList.add("End time is required.")
+        if (location.value.isBlank()) {
+            errorList.add("Location is required.")
+        } else if (!isLocationValid.value) {
+            errorList.add("Selected location is invalid.")
+        }
+        if (cohosts.value.isEmpty()) errorList.add("At least one host is required.")
 
-        return isLocationValid.value && title.value.isNotBlank() &&
-                description.value.isNotBlank() &&
-                eventDate.value != null &&
-                startTime.value != null &&
-                endTime.value != null &&
-                location.value.isNotBlank() &&
-                cohosts.value.isNotEmpty()
+        errors.value = errorList
+        return errorList.isEmpty()
     }
 
     fun triggerValidationDialog() {
