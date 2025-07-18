@@ -36,6 +36,7 @@ import androidx.compose.material.icons.outlined.LocalOffer
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.documentfile.provider.DocumentFile
 import coil.compose.rememberAsyncImagePainter
 import com.example.sabcvasampleapp.neha.ui.theme.BubbleColors
 import com.example.sabcvasampleapp.neha.ui.theme.DefaultEventGradients
@@ -52,12 +53,14 @@ fun EventScreen(navController: NavController, eventId: String) {
 
     val showFilePreview = remember { mutableStateOf(false) }
     val selectedFileUriState = remember { mutableStateOf<Uri?>(null) }
+    var fn = "the attached file."
 
     LaunchedEffect(eventId) {
         viewModel.loadEvent(eventId)
     }
 
     if (showFilePreview.value && selectedFileUriState.value != null) {
+
         ModalBottomSheet(
             onDismissRequest = { showFilePreview.value = false },
             sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
@@ -69,25 +72,27 @@ fun EventScreen(navController: NavController, eventId: String) {
             ) {
                 Text("Attachment", fontWeight = FontWeight.Bold, fontSize = 18.sp)
                 Spacer(Modifier.height(8.dp))
-                Text("Tap below to open the attached file.")
+                Text("Tap below to open ${fn}")
 
-                Spacer(Modifier.height(16.dp))
-                Button(onClick = {
-                    val uri = selectedFileUriState.value
-                    if (uri != null) {
-                        val intent = Intent(Intent.ACTION_VIEW).apply {
-                            setDataAndType(uri, context.contentResolver.getType(uri))
-                            flags = Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_ACTIVITY_NEW_TASK
+                Spacer(Modifier.height(24.dp))
+                Row() {
+                    Button(onClick = {
+                        val uri = selectedFileUriState.value
+                        if (uri != null) {
+                            val intent = Intent(Intent.ACTION_VIEW).apply {
+                                setDataAndType(uri, context.contentResolver.getType(uri))
+                                flags = Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_ACTIVITY_NEW_TASK
+                            }
+                            context.startActivity(intent)
                         }
-                        context.startActivity(intent)
+                    }) {
+                        Text("Open File")
                     }
-                }) {
-                    Text("Open File")
-                }
 
-                Spacer(Modifier.height(8.dp))
-                TextButton(onClick = { showFilePreview.value = false }) {
-                    Text("Close")
+                    Spacer(Modifier.width(18.dp))
+                    TextButton(onClick = { showFilePreview.value = false }) {
+                        Text("Close")
+                    }
                 }
             }
         }
@@ -298,7 +303,13 @@ fun EventScreen(navController: NavController, eventId: String) {
                     if(!e.hasImageFile && e.fileUri != null) {
                         Text("Attachment", fontWeight = FontWeight.Bold, fontSize = 16.sp)
                         Spacer(modifier = Modifier.height(4.dp))
-                        FilePreview(e.fileUri, context) {
+                        val fileName = remember(e.fileUri) {
+                            DocumentFile.fromSingleUri(context, e.fileUri)?.name ?: "Unnamed File"
+                        }
+                        if(fileName !== "Unnamed File") {
+                            fn = fileName
+                        }
+                        FilePreview(uri=e.fileUri, context=context, fileName=fileName) {
                             selectedFileUriState.value = e.fileUri
                             showFilePreview.value = true
                         }
@@ -542,7 +553,7 @@ fun TagSection(tags: List<String>, navController: NavController) {
 }
 
 @Composable
-fun FilePreview(uri: Uri?, context: Context, onClick: () -> Unit) {
+fun FilePreview(uri: Uri?, context: Context, fileName: String, onClick: () -> Unit) {
     if (uri == null) return
 
     Card(
@@ -561,7 +572,7 @@ fun FilePreview(uri: Uri?, context: Context, onClick: () -> Unit) {
         ) {
             Icon(Icons.Default.Description, contentDescription = null)
             Spacer(Modifier.width(8.dp))
-            Text("Attached file", fontSize = 14.sp)
+            Text(fileName, fontSize = 14.sp)
         }
     }
 }
