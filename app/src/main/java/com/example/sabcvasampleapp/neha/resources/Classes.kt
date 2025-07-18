@@ -11,10 +11,10 @@ data class EventDetails(
     val location: String,
     val description: String,
     val attendees: List<String> = listOf(),
-    val hosts: List<String> = listOf(),
+    val hosts: List<Profile> = listOf(),
     val comments: List<Comment> = listOf(),
     val fileUri: Uri? = null,
-    val sponsors: List<String> = listOf(),
+    val sponsors: List<Profile> = listOf(),
     val tags: List<String> = listOf(),
     val hasImageFile: Boolean = false
 )
@@ -25,12 +25,31 @@ data class Comment(
     val timestamp: Long
 )
 
-data class UserDetails(
+data class Profile(
+    val id: String,
     val name: String,
-    val title: String,
-    val phone: Number,
-    val id: Number
+    val email: String = "",
+    val profilePicture: Uri? = null,
+    val type: String
 )
+
+fun createBusinessProfile(
+    id: String,
+    name: String,
+    email: String = "",
+    profilePicture: Uri? = null
+): Profile {
+    return Profile(id, name, email, profilePicture, type = "Business")
+}
+
+fun createPersonProfile(
+    id: String,
+    name: String,
+    email: String = "",
+    profilePicture: Uri? = null
+): Profile {
+    return Profile(id, name, email, profilePicture, type = "Person")
+}
 
 data class PostDetails(
     val title: String,

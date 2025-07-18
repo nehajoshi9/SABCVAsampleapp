@@ -258,10 +258,10 @@ fun EventScreen(navController: NavController, eventId: String) {
                     ) {
                         items(e.hosts) { host ->
                             HostCard(
-                                name = host,
-                                isBusiness = false,
-                                imageUrl = null,
-                                color = BubbleColors[abs(host.hashCode()) % BubbleColors.size]
+                                name = host.name,
+                                isBusiness = host.type === "Business",
+                                imageUri = host.profilePicture,
+                                color = BubbleColors[abs(host.id.hashCode()) % BubbleColors.size]
                             )
                         }
                     }
@@ -274,12 +274,12 @@ fun EventScreen(navController: NavController, eventId: String) {
                             horizontalArrangement = Arrangement.spacedBy(16.dp),
                             contentPadding = PaddingValues(horizontal = 16.dp)
                         ) {
-                            items(e.sponsors) { host ->
+                            items(e.sponsors) { sponsor ->
                                 HostCard(
-                                    name = host,
-                                    isBusiness = false,
-                                    imageUrl = null,
-                                    color = BubbleColors[abs(host.hashCode()) % BubbleColors.size]
+                                    name = sponsor.name,
+                                    isBusiness = true,
+                                    imageUri = null,
+                                    color = BubbleColors[abs(sponsor.id.hashCode()) % BubbleColors.size]
                                 )
                             }
                         }
@@ -471,7 +471,7 @@ fun BadgeWithSquare(text: String, bgColor: Color, textColor: Color) {
 }
 
 @Composable
-fun HostCard(name: String, isBusiness: Boolean, imageUrl: String?, color: Color = Color(0xFFB00020)) {
+fun HostCard(name: String, isBusiness: Boolean, imageUri: Uri?, color: Color = Color(0xFFB00020)) {
     Box(modifier = Modifier
         .background(Color(0xFFF9F9F9), shape = RoundedCornerShape(12.dp))
         .padding(16.dp)
@@ -483,9 +483,9 @@ fun HostCard(name: String, isBusiness: Boolean, imageUrl: String?, color: Color 
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier.width(100.dp)
         ) {
-            if (imageUrl != null) {
+            if (imageUri != null) {
                 Image(
-                    painter = rememberAsyncImagePainter(imageUrl),
+                    painter = rememberAsyncImagePainter(imageUri),
                     contentDescription = null,
                     modifier = Modifier
                         .size(49.dp)

@@ -253,7 +253,7 @@ fun EventCard(
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(event.description, fontSize = 16.sp, color = Color.Black)
                 Spacer(modifier = Modifier.height(4.dp))
-                Text("Hosted by ${event.hosts.joinToString()}", fontSize = 14.sp, color = Color.DarkGray)
+                Text("Hosted by ${event.hosts.map { it.name }.joinToString()}", fontSize = 14.sp, color = Color.DarkGray)
                 Spacer(modifier = Modifier.height(4.dp))
             Text(event.location, fontSize = 12.sp, color = Color.Gray)
                 if(event.tags.isNotEmpty()) {

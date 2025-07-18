@@ -104,6 +104,61 @@ object Repository {
 
     }
 
+    val allPersonProfiles = listOf(
+        createPersonProfile(
+            id = "P_${UUID.randomUUID()}",
+            name = "Alice Johnson",
+            email = "alice.johnson@example.com"
+        ),
+        createPersonProfile(
+            id = "P_${UUID.randomUUID()}",
+            name = "Bob Smith",
+            email = "bob.smith@example.com"
+        ),
+        createPersonProfile(
+            id = "P_${UUID.randomUUID()}",
+            name = "Carmen Reyes",
+            email = "carmen.reyes@example.com"
+        ),
+        createPersonProfile(
+            id = "P_${UUID.randomUUID()}",
+            name = "David Chen",
+            email = "david.chen@example.com"
+        ),
+        createPersonProfile(
+            id = "P_${UUID.randomUUID()}",
+            name = "Eva Patel",
+            email = "eva.patel@example.com"
+        )
+    )
+
+    val allBusinessProfiles = listOf(
+        createBusinessProfile(
+            id = "B_${UUID.randomUUID()}",
+            name = "Google",
+            email = "contact@google.com"
+        ),
+        createBusinessProfile(
+            id = "B_${UUID.randomUUID()}",
+            name = "Facebook",
+            email = "info@facebook.com"
+        ),
+        createBusinessProfile(
+            id = "B_${UUID.randomUUID()}",
+            name = "Amazon",
+            email = "support@amazon.com"
+        ),
+        createBusinessProfile(
+            id = "B_${UUID.randomUUID()}",
+            name = "Microsoft",
+            email = "hello@microsoft.com"
+        )
+    )
+
+    val allProfiles = allPersonProfiles + allBusinessProfiles
+
+
+
     private val allEvents = mutableListOf<EventDetails>(
         EventDetails(
             id = UUID.randomUUID().toString(),
@@ -117,8 +172,8 @@ object Repository {
                 Comment("John Doe", "Looking forward to this event!", 1751992800000),
                 Comment("Alice Kim", "Can't wait to join.", 1751820000000)
             ),
-            hosts = listOf("Alex Johnson", "Taylor Smith", "Morgan Reyes", "Jamie Lee", "Chris Evans"),
-            sponsors = listOf("Adobe", "Figma"),
+            hosts = allProfiles.shuffled().take((1..allProfiles.size).random()),
+            sponsors = allBusinessProfiles.shuffled().take((0..allBusinessProfiles.size).random()),
             tags = listOf("Design", "UX", "Workshop")
         ),
         EventDetails(
@@ -132,18 +187,12 @@ object Repository {
             comments = listOf(
                 Comment("Raj Patel", "Super hyped!", 1751873800000)
             ),
-            hosts = listOf("Eva Patel"),
-            sponsors = listOf("Google", "Microsoft", "OpenAI"),
+            hosts = allProfiles.shuffled().take((1..allProfiles.size).random()),
+            sponsors = allBusinessProfiles.shuffled().take((0..allBusinessProfiles.size).random()),
             tags = listOf("Tech", "AI", "Networking")
         )
     )
 
-    private val allPersonProfiles = mutableListOf<String>(
-        "Alice Johnson", "Bob Smith", "Carmen Reyes", "David Chen",
-        "Eva Patel"
-    )
-
-    val allBusinessProfiles = mutableListOf<String>("Google", "Facebook", "Amazon", "Microsoft")
 
     val allAddresses = listOf(
         "123 Main St, New York, NY",
@@ -152,7 +201,6 @@ object Repository {
         "1600 Pennsylvania Ave NW, Washington, DC",
         "1 Infinite Loop, Cupertino, CA"
     )
-    val allProfiles = allPersonProfiles + allBusinessProfiles
 
     val tagUsageMap = mutableMapOf(
         "Design" to 1,
@@ -207,7 +255,7 @@ object Repository {
         }
     }
 
-    fun addEvent(title: String, startDate: Date, endDate: Date, location: String, description: String, hosts: List<String>, image: Uri? = null, sponsors: List<String> = listOf(), tags: List<String> = listOf(), isImage: Boolean = false) {
+    fun addEvent(title: String, startDate: Date, endDate: Date, location: String, description: String, hosts: List<Profile>, image: Uri? = null, sponsors: List<Profile> = listOf(), tags: List<String> = listOf(), isImage: Boolean = false) {
         allEvents.add(EventDetails(UUID.randomUUID().toString(), title, startDate, endDate, location, description, listOf(), hosts, listOf(), image, sponsors, tags, isImage))
     }
 

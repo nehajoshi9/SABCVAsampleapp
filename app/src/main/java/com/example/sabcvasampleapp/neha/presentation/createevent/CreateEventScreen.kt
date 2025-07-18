@@ -3,7 +3,6 @@ package com.example.sabcvasampleapp.neha.presentation.createevent
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
 import android.content.Intent
-import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
@@ -56,7 +55,7 @@ fun CreateEventScreen(navController: NavController, viewModel: CreateEventViewMo
     val startTime by viewModel.startTime.collectAsState()
     val endTime by viewModel.endTime.collectAsState()
     val eventLocation by viewModel.location.collectAsState()
-    val hosts by viewModel.cohosts.collectAsState()
+    val hosts by viewModel.hosts.collectAsState()
     val sponsors by viewModel.sponsors.collectAsState()
     val selectedFileUri by viewModel.fileUri.collectAsState()
     val showDialog by viewModel.showDialog.collectAsState()
@@ -86,11 +85,11 @@ fun CreateEventScreen(navController: NavController, viewModel: CreateEventViewMo
             }
         }
     }
-    val cohostSuggestions = Repository.allProfiles.filter {
-        it.contains(coHostQuery, ignoreCase = true) && !hosts.contains(it)
+    val hostSuggestions = Repository.allProfiles.filter {
+        it.name.contains(coHostQuery, ignoreCase = true) && !hosts.contains(it)
     }
     val sponsorSuggestions = Repository.allBusinessProfiles.filter {
-        it.contains(sponsorQuery, ignoreCase = true) && !sponsors.contains(it)
+        it.name.contains(sponsorQuery, ignoreCase = true) && !sponsors.contains(it)
     }
 
     val tagSuggestions = Repository.tagUsageMap.keys.filter {
@@ -410,19 +409,19 @@ fun CreateEventScreen(navController: NavController, viewModel: CreateEventViewMo
                     "Search"
                 )
 
-                if (coHostQuery.isNotBlank() && cohostSuggestions.isNotEmpty()) {
+                if (coHostQuery.isNotBlank() && hostSuggestions.isNotEmpty()) {
                     Card(
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(8.dp)
                     ) {
                         Column(modifier = Modifier.padding(8.dp)) {
-                            cohostSuggestions.forEach { name ->
+                            hostSuggestions.forEach { host ->
                                 Text(
-                                    text = name,
+                                    text = host.name,
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .clickable {
-                                            viewModel.addCohost(name)
+                                            viewModel.addHost(host)
                                             coHostQuery = ""
                                         }
                                         .bringIntoViewRequester(bringIntoViewRequester)
@@ -441,7 +440,7 @@ fun CreateEventScreen(navController: NavController, viewModel: CreateEventViewMo
                 }
 
                 FlowRow(modifier = Modifier.padding(top = 8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    hosts.forEach { name ->
+                    hosts.forEach { host ->
                         Surface(
                             color = Color(0xFFE0E0E0),
                             shape = RoundedCornerShape(50),
@@ -451,14 +450,14 @@ fun CreateEventScreen(navController: NavController, viewModel: CreateEventViewMo
                                 verticalAlignment = Alignment.CenterVertically,
                                 modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
                             ) {
-                                Text(text = name, fontSize = 14.sp)
+                                Text(text = host.name, fontSize = 14.sp)
                                 Spacer(modifier = Modifier.width(6.dp))
                                 Icon(
                                     imageVector = Icons.Default.Close,
                                     contentDescription = "Remove",
                                     modifier = Modifier
                                         .size(16.dp)
-                                        .clickable { viewModel.removeCohost(name) }
+                                        .clickable { viewModel.removeHost(host) }
                                 )
                             }
                         }
@@ -485,13 +484,13 @@ fun CreateEventScreen(navController: NavController, viewModel: CreateEventViewMo
                         shape = RoundedCornerShape(8.dp)
                     ) {
                         Column(modifier = Modifier.padding(8.dp)) {
-                            sponsorSuggestions.forEach { name ->
+                            sponsorSuggestions.forEach { sponsor ->
                                 Text(
-                                    text = name,
+                                    text = sponsor.name,
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .clickable {
-                                            viewModel.addSponsor(name)
+                                            viewModel.addSponsor(sponsor)
                                             sponsorQuery = ""
                                         }
                                         .bringIntoViewRequester(bringIntoViewRequester)
@@ -510,7 +509,7 @@ fun CreateEventScreen(navController: NavController, viewModel: CreateEventViewMo
                 }
 
                 FlowRow(modifier = Modifier.padding(top = 8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    sponsors.forEach { name ->
+                    sponsors.forEach { sponsor ->
                         Surface(
                             color = Color(0xFFE0E0E0),
                             shape = RoundedCornerShape(50),
@@ -520,14 +519,14 @@ fun CreateEventScreen(navController: NavController, viewModel: CreateEventViewMo
                                 verticalAlignment = Alignment.CenterVertically,
                                 modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
                             ) {
-                                Text(text = name, fontSize = 14.sp)
+                                Text(text = sponsor.name, fontSize = 14.sp)
                                 Spacer(modifier = Modifier.width(6.dp))
                                 Icon(
                                     imageVector = Icons.Default.Close,
                                     contentDescription = "Remove",
                                     modifier = Modifier
                                         .size(16.dp)
-                                        .clickable { viewModel.removeSponsor(name) }
+                                        .clickable { viewModel.removeSponsor(sponsor) }
                                 )
                             }
                         }

@@ -4,6 +4,7 @@ package com.example.sabcvasampleapp.neha.presentation.createevent
 
 import android.net.Uri
 import androidx.lifecycle.ViewModel
+import com.example.sabcvasampleapp.neha.resources.Profile
 import com.example.sabcvasampleapp.neha.resources.Repository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -13,10 +14,9 @@ import java.util.Date
 class CreateEventViewModel : ViewModel() {
     var title = MutableStateFlow("")
     var description = MutableStateFlow("")
-    //var date = MutableStateFlow("")
     var location = MutableStateFlow("")
-    var cohosts = MutableStateFlow(listOf<String>())
-    var sponsors = MutableStateFlow(listOf<String>())
+    var hosts = MutableStateFlow(listOf<Profile>())
+    var sponsors = MutableStateFlow(listOf<Profile>())
     var fileUri = MutableStateFlow<Uri?>(null)
     var showDialog = MutableStateFlow(false)
     var errors = MutableStateFlow(listOf<String>())
@@ -70,10 +70,10 @@ class CreateEventViewModel : ViewModel() {
     }
 
     fun updateLocation(value: String) { location.value = value }
-    fun addCohost(name: String) { cohosts.value = cohosts.value + name }
-    fun removeCohost(name: String) { cohosts.value = cohosts.value - name }
-    fun addSponsor(name: String) { sponsors.value = sponsors.value + name }
-    fun removeSponsor(name: String) { sponsors.value = sponsors.value - name }
+    fun addHost(host: Profile) { hosts.value = hosts.value + host }
+    fun removeHost(host: Profile) { hosts.value = hosts.value - host }
+    fun addSponsor(sponsor: Profile) { sponsors.value = sponsors.value + sponsor }
+    fun removeSponsor(sponsor: Profile) { sponsors.value = sponsors.value - sponsor }
     fun setFile(uri: Uri?) { fileUri.value = uri }
     fun addTag(tag: String) {
         Repository.tagUsageMap[tag] = Repository.tagUsageMap.getOrDefault(tag, 0) + 1
@@ -99,7 +99,7 @@ class CreateEventViewModel : ViewModel() {
         } else if (!isLocationValid.value) {
             errorList.add("Selected location is invalid.")
         }
-        if (cohosts.value.isEmpty()) errorList.add("At least one host is required.")
+        if (hosts.value.isEmpty()) errorList.add("At least one host is required.")
 
         errors.value = errorList
         return errorList.isEmpty()
