@@ -19,6 +19,9 @@ class CreatePostViewModel(application: Application) : AndroidViewModel(applicati
     private val _description = MutableStateFlow("")
     val description: StateFlow<String> = _description
 
+    val showDialog = MutableStateFlow(false)
+    val errors = MutableStateFlow<List<String>>(emptyList())
+
     private val _selectedFileUri = MutableStateFlow<Uri?>(null)
     val selectedFileUri: StateFlow<Uri?> = _selectedFileUri
 
@@ -35,5 +38,22 @@ class CreatePostViewModel(application: Application) : AndroidViewModel(applicati
         viewModelScope.launch {
             contentResolver.takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
         }
+    }
+
+    fun isValid(): Boolean {
+        val errorList = mutableListOf<String>()
+        if (title.value.isBlank()) errorList.add("Title is required.")
+        if (description.value.isBlank()) errorList.add("Description is required.")
+
+        errors.value = errorList
+        return errorList.isEmpty()
+    }
+
+    fun triggerValidationDialog() {
+        showDialog.value = !isValid()
+    }
+
+    fun resetValidationDialog() {
+        showDialog.value = false
     }
 }

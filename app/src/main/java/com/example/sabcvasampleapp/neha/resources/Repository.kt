@@ -165,9 +165,12 @@ object Repository {
             title = "Design Workshop",
             startDate = buildDate(2025, Calendar.JULY, 17, 14, 0),
             endDate = buildDate(2025, Calendar.JULY, 17, 16, 0),
-            location = "Rust Library",
+            location = "1600 Amphitheatre Parkway, Mountain View, CA",
             description = "Learn the latest UI/UX design trends and techniques in this hands-on workshop.",
-            attendees = listOf("JD", "AK", "MR", "SL", "TW", "PJ", "TY", "QR", "BM", "SS", "SJ"),
+            attendees = allPersonProfiles
+                .shuffled()
+                .take((0..allPersonProfiles.size).random())
+                .map { it.name }, // take this line out
             comments = listOf(
                 Comment("John Doe", "Looking forward to this event!", 1751992800000),
                 Comment("Alice Kim", "Can't wait to join.", 1751820000000)
@@ -183,7 +186,10 @@ object Repository {
             endDate = buildDate(2025, Calendar.JULY, 22, 17, 0), // fixed the endDate which was accidentally set earlier
             location = "Downtown Convention Center",
             description = "Biggest tech event of the year with industry experts.",
-            attendees = listOf("SP", "LK", "AB"),
+            attendees = allPersonProfiles
+                .shuffled()
+                .take((0..allPersonProfiles.size).random())
+                .map { it.name }, // take this line out
             comments = listOf(
                 Comment("Raj Patel", "Super hyped!", 1751873800000)
             ),

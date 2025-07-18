@@ -33,8 +33,7 @@ import androidx.navigation.NavController
 fun CreatePostScreen(
     navController: NavController,
     viewModel: CreatePostViewModel = viewModel(),
-    onCancel: () -> Unit = {},
-    onPublish: (String, String, Uri?) -> Unit = { _, _, _ -> }
+    onCancel: () -> Unit = {}
 ) {
     val title by viewModel.title.collectAsState()
     val description by viewModel.description.collectAsState()
@@ -42,10 +41,46 @@ fun CreatePostScreen(
 
     val context = LocalContext.current
 
+    val showDialog by viewModel.showDialog.collectAsState()
+    val errors by viewModel.errors.collectAsState()
+
     val filePickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.OpenDocument(),
         onResult = { uri -> uri?.let { viewModel.onFileSelected(it) } }
     )
+
+    if (showDialog) {
+        BasicAlertDialog(
+            onDismissRequest = { viewModel.resetValidationDialog() },
+            content = {
+                Surface(
+                    shape = RoundedCornerShape(12.dp),
+                    tonalElevation = 6.dp
+                ) {
+                    Column(
+                        modifier = Modifier.padding(24.dp),
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        Text("Please fix the following:", fontWeight = FontWeight.SemiBold)
+
+                        errors.forEach { error ->
+                            Text("• $error", color = Color(0xFFC50326))
+                        }
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.End
+                        ) {
+                            TextButton(onClick = { viewModel.resetValidationDialog() }) {
+                                Text("OK")
+                            }
+                        }
+                    }
+                }
+            }
+        )
+    }
+
 
     Column(modifier = Modifier.fillMaxSize()) {
         TopAppBar(
@@ -94,8 +129,6 @@ fun CreatePostScreen(
             color = Color.Black,
             modifier = Modifier.padding(horizontal = 20.dp, vertical = 4.dp)
         )
-
-        Spacer(modifier = Modifier.height(4.dp))
 
         Box(
             modifier = Modifier
@@ -146,7 +179,12 @@ fun CreatePostScreen(
             Spacer(modifier = Modifier.width(16.dp))
 
             Button(
-                onClick = { onPublish(title, description, selectedFileUri) },
+                onClick = {
+                    viewModel.triggerValidationDialog()
+                    if (viewModel.isValid()) {
+                        // proceed with post submission
+                    }
+                          },
                 modifier = Modifier.weight(1f),
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFB00020))
             ) {

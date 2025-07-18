@@ -5,6 +5,9 @@ package com.example.sabcvasampleapp.neha.presentation.eventdetails
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.provider.CalendarContract
+import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -200,8 +203,39 @@ fun EventScreen(navController: NavController, eventId: String) {
 
                     Spacer(modifier = Modifier.height(16.dp))
                     InfoCardWithIcon(e.location, "Tap for directions", Icons.Default.Place)
+                    {
+                        val mapsUri = Uri.parse("https://www.google.com/maps/search/?api=1&query=${Uri.encode(e.location)}")
+                        val intent = Intent(Intent.ACTION_VIEW, mapsUri)
+                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK) // just to be safe
+                        try {
+                            context.startActivity(intent)
+                        } catch (e: Exception) {
+                            Log.e("EventScreen", "No app can handle maps intent", e)
+                            Toast.makeText(context, "No app found to open map", Toast.LENGTH_SHORT).show()
+                        }
+                    }
                     Spacer(modifier = Modifier.height(8.dp))
-                    InfoCardWithIcon(Repository.formatEventDateRange(e.startDate, e.endDate), "Add to calendar", Icons.Default.DateRange)
+                    InfoCardWithIcon(Repository.formatEventDateRange(e.startDate, e.endDate), "Add to calendar", Icons.Default.DateRange) {
+                        val startMillis = e.startDate.time // java.util.Date -> milliseconds
+                        val endMillis = e.endDate.time
+
+                        val calendarIntent = Intent(Intent.ACTION_INSERT).apply {
+                            data = Uri.parse("content://com.android.calendar/events")
+                            putExtra(CalendarContract.Events.TITLE, e.title)
+                            putExtra(CalendarContract.Events.EVENT_LOCATION, e.location)
+                            putExtra(CalendarContract.EXTRA_EVENT_BEGIN_TIME, startMillis)
+                            putExtra(CalendarContract.EXTRA_EVENT_END_TIME, endMillis)
+                            putExtra(CalendarContract.Events.DESCRIPTION, e.description)
+                            flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                        }
+
+                        try {
+                            context.startActivity(calendarIntent)
+                        } catch (ex: Exception) {
+                            Log.e("EventScreen", "No calendar app found", ex)
+                            Toast.makeText(context, "No calendar app found", Toast.LENGTH_SHORT).show()
+                        }
+                    }
 
                     Spacer(modifier = Modifier.height(16.dp))
                     Text("About this event", fontWeight = FontWeight.Bold, fontSize = 16.sp)
@@ -236,7 +270,7 @@ fun EventScreen(navController: NavController, eventId: String) {
                                 contentAlignment = Alignment.Center
                             ) {
                                 Text(
-                                    text = initial,
+                                    text = if (isExtra) initial else initial.split(" ").map { it.first() }.joinToString(""),
                                     color = if (isExtra) Color(0xFF388E3C) else Color.Black,
                                     fontSize = 12.sp,
                                     fontWeight = FontWeight.Bold
@@ -431,12 +465,14 @@ fun VerticalOvalIconBox(icon: ImageVector) {
 }
 
 @Composable
-fun InfoCardWithIcon(title: String, subtitle: String, icon: ImageVector) {
+fun InfoCardWithIcon(title: String, subtitle: String, icon: ImageVector, onClick: () -> Unit = {}) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .background(color = Color(0xFFF1F1F1), shape = RoundedCornerShape(12.dp))
-            .padding(12.dp),
+            .padding(12.dp)
+            .clickable { onClick() }
+        ,
         verticalAlignment = Alignment.CenterVertically
     ) {
         VerticalOvalIconBox(icon)
