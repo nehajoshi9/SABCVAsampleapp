@@ -60,7 +60,17 @@ fun EventScreen(navController: NavController, eventId: String) {
     }
 
     if (showFilePreview.value && selectedFileUriState.value != null) {
-
+        val uri = selectedFileUriState.value
+        if (uri != null) {
+            val intent = Intent(Intent.ACTION_VIEW).apply {
+                setDataAndType(uri, context.contentResolver.getType(uri))
+                flags = Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_ACTIVITY_NEW_TASK
+            }
+            context.startActivity(intent)
+            showFilePreview.value = false
+            selectedFileUriState.value = null
+        }
+/* // "Are you sure you want to open the file"
         ModalBottomSheet(
             onDismissRequest = { showFilePreview.value = false },
             sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
@@ -95,7 +105,7 @@ fun EventScreen(navController: NavController, eventId: String) {
                     }
                 }
             }
-        }
+        } */
     }
 
 
@@ -556,6 +566,20 @@ fun TagSection(tags: List<String>, navController: NavController) {
 fun FilePreview(uri: Uri?, context: Context, fileName: String, onClick: () -> Unit) {
     if (uri == null) return
 
+    val mimeType = remember(uri) {
+        uri?.let { context.contentResolver.getType(it) }
+    }
+
+    val icon = when {
+        mimeType?.startsWith("image/") == true -> Icons.Default.Image
+        mimeType == "application/pdf" -> Icons.Default.PictureAsPdf
+        mimeType?.startsWith("text/") == true -> Icons.Default.Article
+        mimeType?.contains("excel", ignoreCase = true) == true -> Icons.Default.GridOn
+        mimeType?.contains("word", ignoreCase = true) == true -> Icons.Default.Description
+        mimeType?.contains("powerpoint", ignoreCase = true) == true -> Icons.Default.Slideshow // optional
+        else -> Icons.Default.InsertDriveFile
+    }
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -570,7 +594,7 @@ fun FilePreview(uri: Uri?, context: Context, fileName: String, onClick: () -> Un
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.padding(12.dp)
         ) {
-            Icon(Icons.Default.Description, contentDescription = null)
+            Icon(icon, contentDescription = null)
             Spacer(Modifier.width(8.dp))
             Text(fileName, fontSize = 14.sp)
         }
