@@ -19,7 +19,6 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -36,25 +35,29 @@ import androidx.navigation.NavController
 import com.example.sabcvasampleapp.neha.presentation.eventdetails.BadgeWithSquare
 import com.example.sabcvasampleapp.neha.resources.Repository
 import androidx.compose.foundation.Image
+import androidx.compose.material.icons.outlined.LocalOffer
+import androidx.compose.runtime.MutableState
 import androidx.compose.ui.layout.ContentScale
 import coil.compose.rememberAsyncImagePainter
-import androidx.compose.ui.graphics.Brush
 import com.example.sabcvasampleapp.neha.ui.theme.DefaultEventGradients
 import java.lang.Math.abs
+//import com.example.sabcvasampleapp.neha.presentation.eventdetails.TagSection
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CalendarScreen(navController: NavController) {
+fun CalendarScreen(navController: NavController, searchQueryParam: String = "") {
     val viewModel: CalendarViewModel = viewModel()
     viewModel.refreshEvents()
-    val events by viewModel.events.collectAsState()
-    var searchQuery by remember { mutableStateOf("") }
+
+    val searchQuery = remember { mutableStateOf(searchQueryParam) }
+
     val selectedFilter = viewModel.selectedFilter.collectAsState().value
+    val events by viewModel.events.collectAsState()
     val currentRange = viewModel.getCurrentDateRange()
     val repository = Repository
 
     val filteredEvents = events.filter {
-            it.title.contains(searchQuery, ignoreCase = true) && Repository.isDateInRangeInclusive(it.startDate, currentRange)
+        (it.tags.contains(searchQuery.value) || it.title.contains(searchQuery.value, ignoreCase = true)) && Repository.isDateInRangeInclusive(it.startDate, currentRange)
         }
 
     Scaffold(
@@ -106,8 +109,8 @@ fun CalendarScreen(navController: NavController) {
             Spacer(modifier = Modifier.height(12.dp))
 
             OutlinedTextField(
-                value = searchQuery,
-                onValueChange = { searchQuery = it },
+                value = searchQuery.value,
+                onValueChange = { searchQuery.value = it },
                 placeholder = { Text("Search events...", fontSize = 15.sp) },
                 modifier = Modifier
                     .fillMaxWidth()
@@ -167,7 +170,7 @@ fun CalendarScreen(navController: NavController) {
                             else repository.removeAttendee(event.id, "YN")
                             viewModel.loadEvent(event.id)
                             viewModel.refreshEvents()
-                        }
+                        }, searchQuery = searchQuery
                     )
                 }
             }
@@ -195,7 +198,8 @@ fun FilterChip(label: String, selected: Boolean, onClick: () -> Unit) {
 fun EventCard(
     event: EventDetails,
     onClick: ((String) -> Unit)? = null,
-    onRSVP: () -> Unit
+    onRSVP: () -> Unit,
+    searchQuery: MutableState<String>? = null,
 ) {
     Card(
         modifier = Modifier
@@ -252,7 +256,10 @@ fun EventCard(
                 Text("Hosted by ${event.hosts.joinToString()}", fontSize = 14.sp, color = Color.DarkGray)
                 Spacer(modifier = Modifier.height(4.dp))
             Text(event.location, fontSize = 12.sp, color = Color.Gray)
+                if(event.tags.isNotEmpty()) {
             Spacer(modifier = Modifier.height(12.dp))
+                TagSection(event.tags, searchQuery) }
+                Spacer(modifier = Modifier.height(12.dp))
             Button(
                 onClick = onRSVP,
                 colors = ButtonDefaults.buttonColors(containerColor = if (event.attendees.contains("YN")) Color(0xFF388E3C) else Color(0xFFB00020)),
@@ -262,6 +269,7 @@ fun EventCard(
                 Text(if(event.attendees.contains("YN"))
                     "RSVP'd" else "RSVP Now", fontSize = 16.sp, color = Color.White)
             }
+
         }
     }
 }
@@ -318,5 +326,45 @@ fun BottomNavigationBar(selectedTab: String) {
                 unselectedTextColor = Color.Gray
             )
         )
+    }
+}
+
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+fun TagSection(tags: List<String>, sq: MutableState<String>? = null) {
+    FlowRow(
+        modifier = Modifier
+            .fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        tags.forEach { tag ->
+            Box(
+                modifier = Modifier
+                    .background(Color(0xFFF2F2F2), RoundedCornerShape(50))
+                    .padding(horizontal = 12.dp, vertical = 6.dp)
+                    .clickable {
+                        if (sq != null) {
+                            sq.value = tag
+                        }
+                    }
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        imageVector = Icons.Outlined.LocalOffer,
+                        contentDescription = "Tag Icon",
+                        tint = Color.Gray,
+                        modifier = Modifier.size(16.dp)
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text(
+                        text = tag,
+                        fontSize = 14.sp,
+                        color = Color.DarkGray
+                    )
+                }
+            }
+        }
     }
 }

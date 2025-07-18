@@ -25,9 +25,14 @@ class MainActivity : ComponentActivity() {
             SABCVASampleAppTheme {
                 val navController = rememberNavController()
                 Surface(modifier = Modifier.fillMaxSize()) {
-                    NavHost(navController = navController, startDestination = "calendar") {
+                    NavHost(navController = navController, startDestination = "create_event") {
                         composable("calendar") {
-                            CalendarScreen(navController)
+                            CalendarScreen(
+                                navController
+                            )
+                        }
+                        composable("calendar/search={searchQuery}") {
+                            CalendarScreen(navController, it.arguments?.getString("searchQuery") ?: "")
                         }
                         composable("event/{eventId}") { backStackEntry ->
                             val eventId = requireNotNull(backStackEntry.arguments?.getString("eventId")) {

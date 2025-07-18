@@ -16,7 +16,6 @@ import androidx.compose.runtime.*
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
@@ -232,7 +231,7 @@ fun EventScreen(navController: NavController, eventId: String) {
                         Spacer(modifier = Modifier.height(16.dp))
                         Text("Tags", fontWeight = FontWeight.Bold, fontSize = 16.sp)
                         Spacer(modifier = Modifier.height(16.dp))
-                        TagSection(e.tags)
+                        TagSection(e.tags, navController)
                     }
 
                     Spacer(modifier = Modifier.height(16.dp))
@@ -455,7 +454,7 @@ fun HostCard(name: String, isBusiness: Boolean, imageUrl: String?, color: Color 
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun TagSection(tags: List<String>) {
+fun TagSection(tags: List<String>, navController: NavController) {
     FlowRow(
         modifier = Modifier
             .fillMaxWidth(),
@@ -467,6 +466,9 @@ fun TagSection(tags: List<String>) {
                 modifier = Modifier
                     .background(Color(0xFFF2F2F2), RoundedCornerShape(50))
                     .padding(horizontal = 12.dp, vertical = 6.dp)
+                    .clickable {
+                        navController.navigate("calendar/search=$tag")
+                    }
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(

@@ -154,6 +154,15 @@ object Repository {
     )
     val allProfiles = allPersonProfiles + allBusinessProfiles
 
+    val tagUsageMap = mutableMapOf(
+        "Design" to 1,
+        "UX" to 1,
+        "Tech" to 1,
+        "AI" to 1,
+        "Networking" to 1,
+        "Workshop" to 1
+    )
+
     fun getAllEvents(): List<EventDetails> = allEvents.toList()
 
     fun getEventById(id: String): EventDetails? =
@@ -198,8 +207,8 @@ object Repository {
         }
     }
 
-    fun addEvent(title: String, startDate: Date, endDate: Date, location: String, description: String, hosts: List<String>, image: Uri? = null) {
-        allEvents.add(EventDetails(UUID.randomUUID().toString(), title, startDate, endDate, location, description, listOf(), hosts, listOf(), image))
+    fun addEvent(title: String, startDate: Date, endDate: Date, location: String, description: String, hosts: List<String>, image: Uri? = null, sponsors: List<String> = listOf(), tags: List<String> = listOf()) {
+        allEvents.add(EventDetails(UUID.randomUUID().toString(), title, startDate, endDate, location, description, listOf(), hosts, listOf(), image, sponsors, tags))
     }
 
    /* fun removeEvent(eventId: String) {

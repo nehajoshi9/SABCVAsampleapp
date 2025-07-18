@@ -4,6 +4,7 @@ package com.example.sabcvasampleapp.neha.presentation.createevent
 
 import android.net.Uri
 import androidx.lifecycle.ViewModel
+import com.example.sabcvasampleapp.neha.resources.Repository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import java.util.Calendar
@@ -18,6 +19,8 @@ class CreateEventViewModel : ViewModel() {
     var sponsors = MutableStateFlow(listOf<String>())
     var fileUri = MutableStateFlow<Uri?>(null)
     var showDialog = MutableStateFlow(false)
+
+    var tags = MutableStateFlow(listOf<String>())
 
     private val _locationValid = MutableStateFlow(false)
     val isLocationValid: StateFlow<Boolean> = _locationValid
@@ -71,7 +74,17 @@ class CreateEventViewModel : ViewModel() {
     fun addSponsor(name: String) { sponsors.value = sponsors.value + name }
     fun removeSponsor(name: String) { sponsors.value = sponsors.value - name }
     fun setFile(uri: Uri?) { fileUri.value = uri }
-
+    fun addTag(tag: String) {
+        Repository.tagUsageMap[tag] = Repository.tagUsageMap.getOrDefault(tag, 0) + 1
+        tags.value = tags.value + tag
+    }
+    fun removeTag(tag: String) {
+        Repository.tagUsageMap[tag] = Repository.tagUsageMap.getOrDefault(tag, 1) - 1
+        if (Repository.tagUsageMap[tag] == 0) {
+            Repository.tagUsageMap.remove(tag)
+        }
+        tags.value = tags.value - tag
+    }
     fun isValid(): Boolean {
         /*
         val locationOk = isLocationValid.value

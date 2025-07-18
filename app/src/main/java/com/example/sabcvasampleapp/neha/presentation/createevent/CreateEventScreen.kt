@@ -21,6 +21,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.outlined.AddCircleOutline
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -39,7 +40,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class,
+@OptIn(
+    ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class,
     ExperimentalLayoutApi::class
 )
 @Composable
@@ -59,8 +61,7 @@ fun CreateEventScreen(navController: NavController, viewModel: CreateEventViewMo
     val invitedSponsors by viewModel.sponsors.collectAsState()
     val selectedFileUri by viewModel.fileUri.collectAsState()
     val showDialog by viewModel.showDialog.collectAsState()
-
-
+    val tags by viewModel.tags.collectAsState()
 
     val filePickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.OpenDocument(),
@@ -77,6 +78,7 @@ fun CreateEventScreen(navController: NavController, viewModel: CreateEventViewMo
     var locationQuery by remember { mutableStateOf(eventLocation) }
     var coHostQuery by remember { mutableStateOf("") }
     var sponsorQuery by remember { mutableStateOf("") }
+    var tagQuery by remember { mutableStateOf("") }
 
     val locationSuggestions by remember(locationQuery) {
         derivedStateOf {
@@ -90,6 +92,10 @@ fun CreateEventScreen(navController: NavController, viewModel: CreateEventViewMo
     }
     val sponsorSuggestions = Repository.allBusinessProfiles.filter {
         it.contains(sponsorQuery, ignoreCase = true) && !invitedSponsors.contains(it)
+    }
+
+    val tagSuggestions = Repository.tagUsageMap.keys.filter {
+        it.contains(tagQuery, ignoreCase = true) && !tags.contains(it)
     }
 
     var showDropdown by remember { mutableStateOf(false) }
@@ -108,7 +114,10 @@ fun CreateEventScreen(navController: NavController, viewModel: CreateEventViewMo
                         modifier = Modifier.padding(24.dp),
                         verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
-                        Text("Please fill out all required fields", fontWeight = FontWeight.SemiBold)
+                        Text(
+                            "Please fill out all required fields",
+                            fontWeight = FontWeight.SemiBold
+                        )
 
                         Row(
                             modifier = Modifier.fillMaxWidth(),
@@ -132,7 +141,11 @@ fun CreateEventScreen(navController: NavController, viewModel: CreateEventViewMo
                 },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = Color.White)
+                        Icon(
+                            Icons.Default.ArrowBack,
+                            contentDescription = "Back",
+                            tint = Color.White
+                        )
                     }
                 },
                 actions = {
@@ -144,21 +157,43 @@ fun CreateEventScreen(navController: NavController, viewModel: CreateEventViewMo
                                 val startTimeCal = Calendar.getInstance().apply { time = startTime }
                                 val endTimeCal = Calendar.getInstance().apply { time = endTime }
 
-                                startDateCal.set(Calendar.HOUR_OF_DAY, startTimeCal.get(Calendar.HOUR_OF_DAY))
+                                startDateCal.set(
+                                    Calendar.HOUR_OF_DAY,
+                                    startTimeCal.get(Calendar.HOUR_OF_DAY)
+                                )
                                 startDateCal.set(Calendar.MINUTE, startTimeCal.get(Calendar.MINUTE))
                                 startDateCal.set(Calendar.SECOND, startTimeCal.get(Calendar.SECOND))
-                                startDateCal.set(Calendar.MILLISECOND, startTimeCal.get(Calendar.MILLISECOND))
+                                startDateCal.set(
+                                    Calendar.MILLISECOND,
+                                    startTimeCal.get(Calendar.MILLISECOND)
+                                )
 
                                 val endDateCal = Calendar.getInstance().apply { time = eventDate }
-                                endDateCal.set(Calendar.HOUR_OF_DAY, endTimeCal.get(Calendar.HOUR_OF_DAY))
+                                endDateCal.set(
+                                    Calendar.HOUR_OF_DAY,
+                                    endTimeCal.get(Calendar.HOUR_OF_DAY)
+                                )
                                 endDateCal.set(Calendar.MINUTE, endTimeCal.get(Calendar.MINUTE))
                                 endDateCal.set(Calendar.SECOND, endTimeCal.get(Calendar.SECOND))
-                                endDateCal.set(Calendar.MILLISECOND, endTimeCal.get(Calendar.MILLISECOND))
+                                endDateCal.set(
+                                    Calendar.MILLISECOND,
+                                    endTimeCal.get(Calendar.MILLISECOND)
+                                )
 
                                 Log.d("DEBUG", "Start time: ${startTime}")
                                 Log.d("DEBUG", "End time: ${endTime}")
 
-                                Repository.addEvent(eventTitle, startDateCal.time, endDateCal.time, eventLocation, eventDescription, invitedCoHosts, selectedFileUri)
+                                Repository.addEvent(
+                                    eventTitle,
+                                    startDateCal.time,
+                                    endDateCal.time,
+                                    eventLocation,
+                                    eventDescription,
+                                    invitedCoHosts,
+                                    selectedFileUri,
+                                    invitedSponsors,
+                                    tags
+                                )
                                 navController.navigate("calendar")
                                 // Publish
                             }
@@ -175,7 +210,11 @@ fun CreateEventScreen(navController: NavController, viewModel: CreateEventViewMo
                         Text("Publish", fontWeight = FontWeight.Medium, fontSize = 14.sp)
                     }
                 },
-                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = Color(0xFFB00020))
+                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                    containerColor = Color(
+                        0xFFB00020
+                    )
+                )
             )
         }
     ) { paddingValues ->
@@ -187,11 +226,24 @@ fun CreateEventScreen(navController: NavController, viewModel: CreateEventViewMo
                 .padding(paddingValues)
                 .padding(horizontal = 20.dp, vertical = 16.dp)
         ) {
-            TextFieldSection(true, "Event Title", eventTitle, viewModel::updateTitle, "Give your event a name")
+            TextFieldSection(
+                true,
+                "Event Title",
+                eventTitle,
+                viewModel::updateTitle,
+                "Give your event a name"
+            )
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            TextFieldSection(true, "Description", eventDescription, viewModel::updateDescription, "Tell people what your event is about", isMultiline = true)
+            TextFieldSection(
+                true,
+                "Description",
+                eventDescription,
+                viewModel::updateDescription,
+                "Tell people what your event is about",
+                isMultiline = true
+            )
 
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -297,7 +349,7 @@ fun CreateEventScreen(navController: NavController, viewModel: CreateEventViewMo
             Spacer(modifier = Modifier.height(16.dp))
 
             // Upload Placeholder
-            AccordionCard(false, false,"Add Media (Optional)", Icons.Default.IosShare) {
+            AccordionCard(false, false, "Add Media (Optional)", Icons.Default.IosShare) {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -306,7 +358,8 @@ fun CreateEventScreen(navController: NavController, viewModel: CreateEventViewMo
                         .border(
                             BorderStroke(2.dp, Color.Red), // red border
                             shape = RoundedCornerShape(12.dp)
-                        ).clickable { // 👈 trigger picker on click
+                        )
+                        .clickable { // 👈 trigger picker on click
                             filePickerLauncher.launch(arrayOf("*/*"))
                         },
                     contentAlignment = Alignment.Center,
@@ -315,13 +368,17 @@ fun CreateEventScreen(navController: NavController, viewModel: CreateEventViewMo
                         Icon(
                             imageVector = if (selectedFileUri != null) Icons.Default.Check else Icons.Default.IosShare, // ← you'll add this
                             contentDescription = "Upload Icon",
-                            tint = if (selectedFileUri != null) Color(0xFF4CAF50) else Color(0xFFe30029),
+                            tint = if (selectedFileUri != null) Color(0xFF4CAF50) else Color(
+                                0xFFe30029
+                            ),
                             modifier = Modifier.size(40.dp)
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
                             text = if (selectedFileUri != null) "File Selected" else "Click to upload",
-                            color = if (selectedFileUri != null) Color(0xFF4CAF50) else Color(0xFFe30029)
+                            color = if (selectedFileUri != null) Color(0xFF4CAF50) else Color(
+                                0xFFe30029
+                            )
                         )
                         Text(
                             if (selectedFileUri != null) "Click to change file" else "Images, PDFs, documents up to 10MB",
@@ -337,7 +394,13 @@ fun CreateEventScreen(navController: NavController, viewModel: CreateEventViewMo
             AccordionCard(false, true, "Hosts", Icons.Default.People) {
                 val bringIntoViewRequester = remember { BringIntoViewRequester() }
 
-                TextFieldSection(true, "Search for a host", coHostQuery, { coHostQuery = it }, "Search")
+                TextFieldSection(
+                    true,
+                    "Search for a host",
+                    coHostQuery,
+                    { coHostQuery = it },
+                    "Search"
+                )
 
                 if (coHostQuery.isNotBlank() && cohostSuggestions.isNotEmpty()) {
                     Card(
@@ -369,7 +432,7 @@ fun CreateEventScreen(navController: NavController, viewModel: CreateEventViewMo
                     }
                 }
 
-                FlowRow(modifier = Modifier.padding(top = 8.dp)) {
+                FlowRow(modifier = Modifier.padding(top = 8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     invitedCoHosts.forEach { name ->
                         Surface(
                             color = Color(0xFFE0E0E0),
@@ -400,7 +463,13 @@ fun CreateEventScreen(navController: NavController, viewModel: CreateEventViewMo
             AccordionCard(false, false, "Sponsors (Optional)", Icons.Default.AttachMoney) {
                 val bringIntoViewRequester = remember { BringIntoViewRequester() }
 
-                TextFieldSection(false, "Search for a sponsor", sponsorQuery, { sponsorQuery = it }, "Search")
+                TextFieldSection(
+                    false,
+                    "Search for a sponsor",
+                    sponsorQuery,
+                    { sponsorQuery = it },
+                    "Search"
+                )
 
                 if (sponsorQuery.isNotBlank() && sponsorSuggestions.isNotEmpty()) {
                     Card(
@@ -432,7 +501,7 @@ fun CreateEventScreen(navController: NavController, viewModel: CreateEventViewMo
                     }
                 }
 
-                FlowRow(modifier = Modifier.padding(top = 8.dp)) {
+                FlowRow(modifier = Modifier.padding(top = 8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     invitedSponsors.forEach { name ->
                         Surface(
                             color = Color(0xFFE0E0E0),
@@ -461,23 +530,32 @@ fun CreateEventScreen(navController: NavController, viewModel: CreateEventViewMo
             Spacer(modifier = Modifier.height(16.dp))
 
 
-            AccordionCard(false, false, "Tags (Optional)", Icons.Default.Tag) { /*
-                val bringIntoViewRequester = remember { BringIntoViewRequester() }
-
-                TextFieldSection(false, "Add a tag", tagQuery, { tagQuery = it }, "Type and press enter")
-
-// Handle "Enter" or done button to add custom tag
-                LaunchedEffect(tagQuery) {
-                    if (tagQuery.endsWith("\n")) {
-                        val cleaned = tagQuery.trim()
-                        if (cleaned.isNotEmpty() && !selectedTags.contains(cleaned)) {
-                            viewModel.addTag(cleaned)
+            AccordionCard(false, false, "Tags (Optional)", Icons.Default.Tag) {
+                // Tag input section (with presets + custom tag support)
+                TextFieldSection(
+                    required = false,
+                    label = "Enter a tag",
+                    value = tagQuery,
+                    onValueChange = { tagQuery = it },
+                    placeholder = "Search", trailingContent = {
+                        if (tagQuery.isNotBlank()) {
+                        IconButton(
+                            onClick = {
+                                    viewModel.addTag(tagQuery.trim())
+                                    tagQuery = ""
+                            }
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.AddCircleOutline,
+                                contentDescription = "Add Tag",
+                                tint = Color(0xFF2596be)
+                            )
                         }
-                        tagQuery = ""
+                        }
                     }
-                }
+                )
 
-// Suggestions (optional UI)
+                // Tag Suggestions Dropdown
                 if (tagQuery.isNotBlank() && tagSuggestions.isNotEmpty()) {
                     Card(
                         modifier = Modifier.fillMaxWidth(),
@@ -493,14 +571,6 @@ fun CreateEventScreen(navController: NavController, viewModel: CreateEventViewMo
                                             viewModel.addTag(tag)
                                             tagQuery = ""
                                         }
-                                        .bringIntoViewRequester(bringIntoViewRequester)
-                                        .onFocusChanged {
-                                            if (it.isFocused) {
-                                                coroutineScope.launch {
-                                                    bringIntoViewRequester.bringIntoView()
-                                                }
-                                            }
-                                        }
                                         .padding(vertical = 8.dp)
                                 )
                             }
@@ -508,8 +578,9 @@ fun CreateEventScreen(navController: NavController, viewModel: CreateEventViewMo
                     }
                 }
 
-                FlowRow(modifier = Modifier.padding(top = 8.dp)) {
-                    selectedTags.forEach { tag ->
+                // Display Selected Tags
+                FlowRow(modifier = Modifier.padding(top = 8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    tags.forEach { tag ->
                         Surface(
                             color = Color(0xFFE0E0E0),
                             shape = RoundedCornerShape(50),
@@ -532,13 +603,14 @@ fun CreateEventScreen(navController: NavController, viewModel: CreateEventViewMo
                         }
                     }
                 }
-
-*/
             }
 
+
         }
+
     }
 }
+
 
 @Composable
 fun TextFieldSection(
@@ -549,7 +621,8 @@ fun TextFieldSection(
     placeholder: String,
     isMultiline: Boolean = false,
     allowTyping: Boolean = true,
-    onClick: (() -> Unit)? = null
+    onClick: (() -> Unit)? = null,
+    trailingContent: (@Composable () -> Unit)? = null
 ) {
     Text(
         text = buildAnnotatedString {
@@ -613,7 +686,7 @@ fun TextFieldSection(
                 unfocusedBorderColor = Color.Transparent,
                 focusedContainerColor = Color(0xFFF2F2F2),
                 unfocusedContainerColor = Color(0xFFF2F2F2),
-            )
+            ), trailingIcon = trailingContent
         )
     }
 }
