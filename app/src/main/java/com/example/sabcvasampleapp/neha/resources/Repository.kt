@@ -6,266 +6,362 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 object Repository {
-    fun getFormattedDate(date: Date?): String {
-        return date?.let {
-            val sdf = SimpleDateFormat("MM/dd/yyyy", Locale.getDefault())
-            sdf.format(it)
-        } ?: ""
-    }
+    // Delegating data
+    val allPersonProfiles get() = Data.allPersonProfiles
+    val allBusinessProfiles get() = Data.allBusinessProfiles
+    val allProfiles get() = Data.allProfiles
+    val allAddresses get() = Data.allAddresses
+    val tagUsageMap get() = Data.tagUsageMap
 
-    fun getFormattedTime(date: Date?): String {
-        return date?.let {
-            val formatter = SimpleDateFormat("h:mm a", Locale.getDefault()) // 12-hour format with AM/PM
-            formatter.format(it)
-        } ?: ""
-    }
+    // Delegating utilities
+    fun getFormattedDate(date: Date?) = Utilities.getFormattedDate(date)
+    fun getFormattedTime(date: Date?) = Utilities.getFormattedTime(date)
+    fun buildDate(year: Int, month: Int, day: Int, hour: Int, minute: Int) =
+        Utilities.buildDate(year, month, day, hour, minute)
 
-    fun buildDate(year: Int, month: Int, day: Int, hour: Int, minute: Int): Date {
-        return Calendar.getInstance().apply {
-            set(year, month, day, hour, minute, 0)
-            set(Calendar.MILLISECOND, 0)
-        }.time
-    }
+    fun formatEventDateRange(start: Date, end: Date) =
+        Utilities.formatEventDateRange(start, end)
 
-    fun getThisWeekRange(): Pair<Date, Date> {
-        val calendar = Calendar.getInstance()
+    fun isDateInRangeInclusive(target: Date, range: Pair<Date, Date>) =
+        Utilities.isDateInRangeInclusive(target, range)
 
-        // Set to start of week (Sunday)
-        calendar.set(Calendar.DAY_OF_WEEK, calendar.firstDayOfWeek)
+    fun formatDateRangeString(dates: Pair<Date, Date>) =
+        Utilities.formatDateRangeString(dates)
 
-        val startOfWeek = calendar.time
+    fun getThisWeekRange() = Utilities.getThisWeekRange()
+    fun getNextWeekRange() = Utilities.getNextWeekRange()
+    fun getThisMonthRange() = Utilities.getThisMonthRange()
 
-        // Set to end of week (Saturday 11:59:59 PM)
-        calendar.add(Calendar.DAY_OF_WEEK, 6)
+    val dateRangeMap get() = Utilities.dateRangeMap
 
-        val endOfWeek = calendar.time
+    // Delegating actions
+    fun addAttendee(eventId: String, name: String) =
+        Actions.addAttendee(eventId, name)
 
-        return Pair(startOfWeek, endOfWeek)
-    }
+    fun removeAttendee(eventId: String, name: String) =
+        Actions.removeAttendee(eventId, name)
 
-    val dateRangeMap: Map<String, () -> Pair<Date, Date>> = mapOf(
-        "This Week" to Repository::getThisWeekRange,
-        "Next Week" to Repository::getNextWeekRange,
-        "This Month" to Repository::getThisMonthRange
+    fun addComment(eventId: String, msg: String) =
+        Actions.addComment(eventId, msg)
+
+    fun addEvent(
+        title: String,
+        startDate: Date,
+        endDate: Date,
+        location: String,
+        description: String,
+        hosts: List<Profile>,
+        image: Uri? = null,
+        sponsors: List<Profile> = listOf(),
+        tags: List<String> = listOf(),
+        isImage: Boolean = false
+    ) = Actions.addEvent(
+        title,
+        startDate,
+        endDate,
+        location,
+        description,
+        hosts,
+        image,
+        sponsors,
+        tags,
+        isImage
     )
 
-
-
-    fun getNextWeekRange(): Pair<Date, Date> {
-        val (thisWeekStart, _) = getThisWeekRange()
-
-        val start = Calendar.getInstance().apply {
-            time = thisWeekStart
-            add(Calendar.DAY_OF_YEAR, 7)
-        }
-        val end = (start.clone() as Calendar).apply {
-            add(Calendar.DAY_OF_WEEK, 6)
-        }
-
-        return Pair(start.time, end.time)
-    }
-
-    fun getThisMonthRange(): Pair<Date, Date> {
-        val start = Calendar.getInstance().apply {
-            set(Calendar.DAY_OF_MONTH, 1)
-        }
-        val end = Calendar.getInstance().apply {
-            set(Calendar.DAY_OF_MONTH, getActualMaximum(Calendar.DAY_OF_MONTH))
-        }
-        return Pair(start.time, end.time)
-    }
-
-
-    fun formatEventDateRange(start: Date, end: Date): String {
-        val dayFormat = SimpleDateFormat("EEE, MMM d", Locale.getDefault()) // Wed, Jun 15
-
-        val dayPart = dayFormat.format(start)
-        val startTime = getFormattedTime(start)
-        val endTime = getFormattedTime(end)
-
-        return "$dayPart • $startTime – $endTime"
-    }
-
-    fun isDateInRangeInclusive(target: Date, range: Pair<Date, Date>): Boolean {
-        val dateOnlyFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-
-        val targetStr = dateOnlyFormat.format(target)
-        val startStr = dateOnlyFormat.format(range.first)
-        val endStr = dateOnlyFormat.format(range.second)
-
-        return targetStr >= startStr && targetStr <= endStr
-    }
-
-    fun formatDateRangeString(dates: Pair<Date, Date>): String {
-        Calendar.getInstance().apply { time = dates.second }.get(Calendar.YEAR)
-
-        val formatter = SimpleDateFormat("MMM d, yyyy", Locale.getDefault())
-        return "${formatter.format(dates.first)} – ${formatter.format(dates.second)}"
-
-    }
-
-    val allPersonProfiles = listOf(
-        createPersonProfile(
-            id = "P_${UUID.randomUUID()}",
-            name = "Alice Johnson",
-            email = "alice.johnson@example.com"
-        ),
-        createPersonProfile(
-            id = "P_${UUID.randomUUID()}",
-            name = "Bob Smith",
-            email = "bob.smith@example.com"
-        ),
-        createPersonProfile(
-            id = "P_${UUID.randomUUID()}",
-            name = "Carmen Reyes",
-            email = "carmen.reyes@example.com"
-        ),
-        createPersonProfile(
-            id = "P_${UUID.randomUUID()}",
-            name = "David Chen",
-            email = "david.chen@example.com"
-        ),
-        createPersonProfile(
-            id = "P_${UUID.randomUUID()}",
-            name = "Eva Patel",
-            email = "eva.patel@example.com"
-        )
-    )
-
-    val allBusinessProfiles = listOf(
-        createBusinessProfile(
-            id = "B_${UUID.randomUUID()}",
-            name = "Google",
-            email = "contact@google.com"
-        ),
-        createBusinessProfile(
-            id = "B_${UUID.randomUUID()}",
-            name = "Facebook",
-            email = "info@facebook.com"
-        ),
-        createBusinessProfile(
-            id = "B_${UUID.randomUUID()}",
-            name = "Amazon",
-            email = "support@amazon.com"
-        ),
-        createBusinessProfile(
-            id = "B_${UUID.randomUUID()}",
-            name = "Microsoft",
-            email = "hello@microsoft.com"
-        )
-    )
-
-    val allProfiles = allPersonProfiles + allBusinessProfiles
-
-
-
-    private val allEvents = mutableListOf<EventDetails>(
-        EventDetails(
-            id = UUID.randomUUID().toString(),
-            title = "Design Workshop",
-            startDate = buildDate(2025, Calendar.JULY, 17, 14, 0),
-            endDate = buildDate(2025, Calendar.JULY, 17, 16, 0),
-            location = "1600 Amphitheatre Parkway, Mountain View, CA",
-            description = "Learn the latest UI/UX design trends and techniques in this hands-on workshop.",
-            attendees = allPersonProfiles
-                .shuffled()
-                .take((0..allPersonProfiles.size).random())
-                .map { it.name }, // take this line out
-            comments = listOf(
-                Comment("John Doe", "Looking forward to this event!", 1751992800000),
-                Comment("Alice Kim", "Can't wait to join.", 1751820000000)
-            ),
-            hosts = allProfiles.shuffled().take((1..allProfiles.size).random()),
-            sponsors = allBusinessProfiles.shuffled().take((0..allBusinessProfiles.size).random()),
-            tags = listOf("Design", "UX", "Workshop")
-        ),
-        EventDetails(
-            id = UUID.randomUUID().toString(),
-            title = "Tech Conference 2025",
-            startDate = buildDate(2025, Calendar.JULY, 22, 9, 0),
-            endDate = buildDate(2025, Calendar.JULY, 22, 17, 0), // fixed the endDate which was accidentally set earlier
-            location = "Downtown Convention Center",
-            description = "Biggest tech event of the year with industry experts.",
-            attendees = allPersonProfiles
-                .shuffled()
-                .take((0..allPersonProfiles.size).random())
-                .map { it.name }, // take this line out
-            comments = listOf(
-                Comment("Raj Patel", "Super hyped!", 1751873800000)
-            ),
-            hosts = allProfiles.shuffled().take((1..allProfiles.size).random()),
-            sponsors = allBusinessProfiles.shuffled().take((0..allBusinessProfiles.size).random()),
-            tags = listOf("Tech", "AI", "Networking")
-        )
-    )
-
-
-    val allAddresses = listOf(
-        "123 Main St, New York, NY",
-        "456 Maple Ave, Los Angeles, CA",
-        "789 Oak Blvd, Chicago, IL",
-        "1600 Pennsylvania Ave NW, Washington, DC",
-        "1 Infinite Loop, Cupertino, CA"
-    )
-
-    val tagUsageMap = mutableMapOf(
-        "Design" to 1,
-        "UX" to 1,
-        "Tech" to 1,
-        "AI" to 1,
-        "Networking" to 1,
-        "Workshop" to 1
-    )
-
-    fun getAllEvents(): List<EventDetails> = allEvents.toList()
-
-    fun getEventById(id: String): EventDetails? =
-        allEvents.find { it.id == id }
-
-    fun addAttendee(eventId: String, attendeeName: String) {
-        val index = allEvents.indexOfFirst { it.id == eventId }
-        if (index != -1) {
-            val event = allEvents[index]
-            val updatedEvent = event.copy(
-                attendees = event.attendees + attendeeName
-            )
-            allEvents[index] = updatedEvent
-        }
-    }
-
-    fun removeAttendee(eventId: String, attendeeName: String) {
-        val index = allEvents.indexOfFirst { it.id == eventId }
-        if (index != -1) {
-            val event = allEvents[index]
-            val updatedEvent = event.copy(
-                attendees = event.attendees - attendeeName
-            )
-            allEvents[index] = updatedEvent
-        }
-    }
-
-    fun addComment(eventId: String, message: String) {
-        val index = allEvents.indexOfFirst { it.id == eventId }
-        if (index != -1) {
-            val event = allEvents[index]
-            val updatedEvent = event.copy(
-                comments = listOf(
-                    Comment(
-                        "You",
-                        message,
-                        System.currentTimeMillis()
-                    )
-                ) + event.comments
-            )
-            allEvents[index] = updatedEvent
-        }
-    }
-
-    fun addEvent(title: String, startDate: Date, endDate: Date, location: String, description: String, hosts: List<Profile>, image: Uri? = null, sponsors: List<Profile> = listOf(), tags: List<String> = listOf(), isImage: Boolean = false) {
-        allEvents.add(EventDetails(UUID.randomUUID().toString(), title, startDate, endDate, location, description, listOf(), hosts, listOf(), image, sponsors, tags, isImage))
-    }
-
-   /* fun removeEvent(eventId: String) {
-        allEvents.removeIf { it.id == eventId }
-    }*/
+    fun getAllEvents(): List<EventDetails> = Data.getAllEvents()
+    fun getEventById(id: String): EventDetails? = Data.getEventById(id)
 }
+
+/*
+fun getFormattedDate(date: Date?): String {
+    return date?.let {
+        val sdf = SimpleDateFormat("MM/dd/yyyy", Locale.getDefault())
+        sdf.format(it)
+    } ?: ""
+}
+
+fun getFormattedTime(date: Date?): String {
+    return date?.let {
+        val formatter =
+            SimpleDateFormat("h:mm a", Locale.getDefault()) // 12-hour format with AM/PM
+        formatter.format(it)
+    } ?: ""
+}
+
+fun buildDate(year: Int, month: Int, day: Int, hour: Int, minute: Int): Date {
+    return Calendar.getInstance().apply {
+        set(year, month, day, hour, minute, 0)
+        set(Calendar.MILLISECOND, 0)
+    }.time
+}
+
+fun getThisWeekRange(): Pair<Date, Date> {
+    val calendar = Calendar.getInstance()
+
+    // Set to start of week (Sunday)
+    calendar.set(Calendar.DAY_OF_WEEK, calendar.firstDayOfWeek)
+
+    val startOfWeek = calendar.time
+
+    // Set to end of week (Saturday 11:59:59 PM)
+    calendar.add(Calendar.DAY_OF_WEEK, 6)
+
+    val endOfWeek = calendar.time
+
+    return Pair(startOfWeek, endOfWeek)
+}
+
+val dateRangeMap: Map<String, () -> Pair<Date, Date>> = mapOf(
+    "This Week" to Repository::getThisWeekRange,
+    "Next Week" to Repository::getNextWeekRange,
+    "This Month" to Repository::getThisMonthRange
+)
+
+fun getNextWeekRange(): Pair<Date, Date> {
+    val (thisWeekStart, _) = getThisWeekRange()
+
+    val start = Calendar.getInstance().apply {
+        time = thisWeekStart
+        add(Calendar.DAY_OF_YEAR, 7)
+    }
+    val end = (start.clone() as Calendar).apply {
+        add(Calendar.DAY_OF_WEEK, 6)
+    }
+
+    return Pair(start.time, end.time)
+}
+
+fun getThisMonthRange(): Pair<Date, Date> {
+    val start = Calendar.getInstance().apply {
+        set(Calendar.DAY_OF_MONTH, 1)
+    }
+    val end = Calendar.getInstance().apply {
+        set(Calendar.DAY_OF_MONTH, getActualMaximum(Calendar.DAY_OF_MONTH))
+    }
+    return Pair(start.time, end.time)
+}
+
+fun formatEventDateRange(start: Date, end: Date): String {
+    val dayFormat = SimpleDateFormat("EEE, MMM d", Locale.getDefault()) // Wed, Jun 15
+
+    val dayPart = dayFormat.format(start)
+    val startTime = getFormattedTime(start)
+    val endTime = getFormattedTime(end)
+
+    return "$dayPart • $startTime – $endTime"
+}
+
+fun isDateInRangeInclusive(target: Date, range: Pair<Date, Date>): Boolean {
+    val dateOnlyFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+
+    val targetStr = dateOnlyFormat.format(target)
+    val startStr = dateOnlyFormat.format(range.first)
+    val endStr = dateOnlyFormat.format(range.second)
+
+    return targetStr >= startStr && targetStr <= endStr
+}
+
+fun formatDateRangeString(dates: Pair<Date, Date>): String {
+    Calendar.getInstance().apply { time = dates.second }.get(Calendar.YEAR)
+
+    val formatter = SimpleDateFormat("MMM d, yyyy", Locale.getDefault())
+    return "${formatter.format(dates.first)} – ${formatter.format(dates.second)}"
+
+}
+
+val allPersonProfiles = listOf(
+    createPersonProfile(
+        id = "P_${UUID.randomUUID()}",
+        name = "Alice Johnson",
+        email = "alice.johnson@example.com"
+    ),
+    createPersonProfile(
+        id = "P_${UUID.randomUUID()}",
+        name = "Bob Smith",
+        email = "bob.smith@example.com"
+    ),
+    createPersonProfile(
+        id = "P_${UUID.randomUUID()}",
+        name = "Carmen Reyes",
+        email = "carmen.reyes@example.com"
+    ),
+    createPersonProfile(
+        id = "P_${UUID.randomUUID()}",
+        name = "David Chen",
+        email = "david.chen@example.com"
+    ),
+    createPersonProfile(
+        id = "P_${UUID.randomUUID()}",
+        name = "Eva Patel",
+        email = "eva.patel@example.com"
+    )
+)
+
+val allBusinessProfiles = listOf(
+    createBusinessProfile(
+        id = "B_${UUID.randomUUID()}",
+        name = "Google",
+        email = "contact@google.com"
+    ),
+    createBusinessProfile(
+        id = "B_${UUID.randomUUID()}",
+        name = "Facebook",
+        email = "info@facebook.com"
+    ),
+    createBusinessProfile(
+        id = "B_${UUID.randomUUID()}",
+        name = "Amazon",
+        email = "support@amazon.com"
+    ),
+    createBusinessProfile(
+        id = "B_${UUID.randomUUID()}",
+        name = "Microsoft",
+        email = "hello@microsoft.com"
+    )
+)
+
+val allProfiles = allPersonProfiles + allBusinessProfiles
+
+private val allEvents = mutableListOf<EventDetails>(
+    EventDetails(
+        id = UUID.randomUUID().toString(),
+        title = "Design Workshop",
+        startDate = buildDate(2025, Calendar.JULY, 17, 14, 0),
+        endDate = buildDate(2025, Calendar.JULY, 17, 16, 0),
+        location = "1600 Amphitheatre Parkway, Mountain View, CA",
+        description = "Learn the latest UI/UX design trends and techniques in this hands-on workshop.",
+        attendees = allPersonProfiles
+            .shuffled()
+            .take((0..allPersonProfiles.size).random())
+            .map { it.name }, // take this line out
+        comments = listOf(
+            Comment("John Doe", "Looking forward to this event!", 1751992800000),
+            Comment("Alice Kim", "Can't wait to join.", 1751820000000)
+        ),
+        hosts = allProfiles.shuffled().take((1..allProfiles.size).random()),
+        sponsors = allBusinessProfiles.shuffled().take((0..allBusinessProfiles.size).random()),
+        tags = listOf("Design", "UX", "Workshop")
+    ),
+    EventDetails(
+        id = UUID.randomUUID().toString(),
+        title = "Tech Conference 2025",
+        startDate = buildDate(2025, Calendar.JULY, 22, 9, 0),
+        endDate = buildDate(
+            2025,
+            Calendar.JULY,
+            22,
+            17,
+            0
+        ), // fixed the endDate which was accidentally set earlier
+        location = "Downtown Convention Center",
+        description = "Biggest tech event of the year with industry experts.",
+        attendees = allPersonProfiles
+            .shuffled()
+            .take((0..allPersonProfiles.size).random())
+            .map { it.name }, // take this line out
+        comments = listOf(
+            Comment("Raj Patel", "Super hyped!", 1751873800000)
+        ),
+        hosts = allProfiles.shuffled().take((1..allProfiles.size).random()),
+        sponsors = allBusinessProfiles.shuffled().take((0..allBusinessProfiles.size).random()),
+        tags = listOf("Tech", "AI", "Networking")
+    )
+)
+
+val allAddresses = listOf(
+    "123 Main St, New York, NY",
+    "456 Maple Ave, Los Angeles, CA",
+    "789 Oak Blvd, Chicago, IL",
+    "1600 Pennsylvania Ave NW, Washington, DC",
+    "1 Infinite Loop, Cupertino, CA"
+)
+
+val tagUsageMap = mutableMapOf(
+    "Design" to 1,
+    "UX" to 1,
+    "Tech" to 1,
+    "AI" to 1,
+    "Networking" to 1,
+    "Workshop" to 1
+)
+
+fun getAllEvents(): List<EventDetails> = allEvents.toList()
+
+fun getEventById(id: String): EventDetails? =
+    allEvents.find { it.id == id }
+
+fun addAttendee(eventId: String, attendeeName: String) {
+    val index = allEvents.indexOfFirst { it.id == eventId }
+    if (index != -1) {
+        val event = allEvents[index]
+        val updatedEvent = event.copy(
+            attendees = event.attendees + attendeeName
+        )
+        allEvents[index] = updatedEvent
+    }
+}
+
+fun removeAttendee(eventId: String, attendeeName: String) {
+    val index = allEvents.indexOfFirst { it.id == eventId }
+    if (index != -1) {
+        val event = allEvents[index]
+        val updatedEvent = event.copy(
+            attendees = event.attendees - attendeeName
+        )
+        allEvents[index] = updatedEvent
+    }
+}
+
+fun addComment(eventId: String, message: String) {
+    val index = allEvents.indexOfFirst { it.id == eventId }
+    if (index != -1) {
+        val event = allEvents[index]
+        val updatedEvent = event.copy(
+            comments = listOf(
+                Comment(
+                    "You",
+                    message,
+                    System.currentTimeMillis()
+                )
+            ) + event.comments
+        )
+        allEvents[index] = updatedEvent
+    }
+}
+
+fun addEvent(
+    title: String,
+    startDate: Date,
+    endDate: Date,
+    location: String,
+    description: String,
+    hosts: List<Profile>,
+    image: Uri? = null,
+    sponsors: List<Profile> = listOf(),
+    tags: List<String> = listOf(),
+    isImage: Boolean = false
+) {
+    allEvents.add(
+        EventDetails(
+            UUID.randomUUID().toString(),
+            title,
+            startDate,
+            endDate,
+            location,
+            description,
+            listOf(),
+            hosts,
+            listOf(),
+            image,
+            sponsors,
+            tags,
+            isImage
+        )
+    )
+}
+
+/* fun removeEvent(eventId: String) {
+     allEvents.removeIf { it.id == eventId }
+ }*/
+
+ */

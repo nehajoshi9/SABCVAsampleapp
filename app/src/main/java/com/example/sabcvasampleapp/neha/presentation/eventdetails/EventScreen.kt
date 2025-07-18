@@ -56,7 +56,7 @@ fun EventScreen(navController: NavController, eventId: String) {
 
     val showFilePreview = remember { mutableStateOf(false) }
     val selectedFileUriState = remember { mutableStateOf<Uri?>(null) }
-    var fn = "the attached file."
+    //var fn = "the attached file."
 
     LaunchedEffect(eventId) {
         viewModel.loadEvent(eventId)
@@ -349,9 +349,6 @@ fun EventScreen(navController: NavController, eventId: String) {
                         Spacer(modifier = Modifier.height(4.dp))
                         val fileName = remember(e.fileUri) {
                             DocumentFile.fromSingleUri(context, e.fileUri)?.name ?: "Unnamed File"
-                        }
-                        if(fileName !== "Unnamed File") {
-                            fn = fileName
                         }
                         FilePreview(uri=e.fileUri, context=context, fileName=fileName) {
                             selectedFileUriState.value = e.fileUri
