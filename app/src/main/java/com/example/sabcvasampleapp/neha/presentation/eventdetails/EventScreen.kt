@@ -35,10 +35,15 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.outlined.LocalOffer
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.window.Dialog
 import androidx.documentfile.provider.DocumentFile
 import coil.compose.rememberAsyncImagePainter
 import com.example.sabcvasampleapp.neha.ui.theme.BubbleColors
@@ -54,6 +59,7 @@ fun EventScreen(navController: NavController, eventId: String) {
     val repository = Repository
     val event: EventDetails? by viewModel.event.collectAsState()
 
+    val showAttendeeList = remember { mutableStateOf(false) }
     val showFilePreview = remember { mutableStateOf(false) }
     val selectedFileUriState = remember { mutableStateOf<Uri?>(null) }
     //var fn = "the attached file."
@@ -243,15 +249,30 @@ fun EventScreen(navController: NavController, eventId: String) {
                     Text(e.description, fontSize = 14.sp)
 
                     Spacer(modifier = Modifier.height(16.dp))
-                    Text("Attendees", fontWeight = FontWeight.Bold, fontSize = 16.sp)
-                    Spacer(modifier = Modifier.height(8.dp))
-                }
 
-                item {
+// Header row with Attendees + See All
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text("Attendees", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                        Text(
+                            text = "See All",
+                            fontSize = 15.sp,
+                            color = Color(0xFFB00020),
+                            modifier = Modifier.clickable { showAttendeeList.value = true }
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+// Row of initials
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(vertical = 8.dp),
+                            .padding(horizontal = 8.dp, vertical = 8.dp),
                         horizontalArrangement = Arrangement.Start
                     ) {
                         val extra = e.attendees.size > 7
@@ -278,6 +299,115 @@ fun EventScreen(navController: NavController, eventId: String) {
                             }
                         }
                     }
+
+                    if (showAttendeeList.value) {
+                        val scrollState = rememberScrollState()
+                        val fadeAlpha by remember {
+                            derivedStateOf {
+                                val maxScroll = scrollState.maxValue.toFloat().coerceAtLeast(1f)
+                                val currentScroll = scrollState.value.toFloat()
+                                (1f - (currentScroll / maxScroll)).coerceIn(0f, 1f)
+                            }
+                        }
+
+                        Dialog(onDismissRequest = { showAttendeeList.value = false }) {
+                            Surface(
+                                shape = RoundedCornerShape(16.dp),
+                                color = Color.White,
+                                tonalElevation = 6.dp,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(24.dp)
+                            ) {
+                                Column(modifier = Modifier.padding(20.dp)) {
+                                    // Title
+                                    Text(
+                                        text = "All Attendees",
+                                        fontSize = 18.sp,
+                                        fontWeight = FontWeight.Bold
+                                    )
+
+                                    Spacer(modifier = Modifier.height(16.dp))
+
+                                    // Scrollable list in a box with fading overlay
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .heightIn(max = 250.dp)
+                                    ) {
+                                        Column(
+                                            modifier = Modifier
+                                                .verticalScroll(scrollState)
+                                                .fillMaxWidth()
+                                        ) {
+                                            e.attendees.forEachIndexed { index, name ->
+                                                Row(
+                                                    verticalAlignment = Alignment.CenterVertically,
+                                                    modifier = Modifier
+                                                        .fillMaxWidth()
+                                                        .padding(vertical = 6.dp)
+                                                ) {
+                                                    Box(
+                                                        modifier = Modifier
+                                                            .size(32.dp)
+                                                            .clip(CircleShape)
+                                                            .background(Color.LightGray),
+                                                        contentAlignment = Alignment.Center
+                                                    ) {
+                                                        Text(
+                                                            text = name.split(" ").map { it.first() }.joinToString(""),
+                                                            fontSize = 12.sp,
+                                                            fontWeight = FontWeight.Bold
+                                                        )
+                                                    }
+                                                    Spacer(modifier = Modifier.width(12.dp))
+                                                    Text(
+                                                        text = name,
+                                                        fontSize = 14.sp,
+                                                        fontWeight = FontWeight.Medium
+                                                    )
+                                                }
+
+                                                if (index != e.attendees.lastIndex) {
+                                                    Divider(color = Color(0xFFE0E0E0), thickness = 1.dp)
+                                                }
+                                            }
+                                        }
+
+                                        // White gradient overlay at bottom (only fades if not at end)
+                                        Box(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .height(100.dp)
+                                                .align(Alignment.BottomCenter)
+                                                .background(
+                                                    brush = Brush.verticalGradient(
+                                                        colors = listOf(
+                                                            Color.Transparent,
+                                                            Color.White.copy(alpha = fadeAlpha)
+                                                        )
+                                                    )
+                                                )
+                                        )
+                                    }
+
+                                    Spacer(modifier = Modifier.height(16.dp))
+
+                                    // Close button bottom right
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.End
+                                    ) {
+                                        TextButton(onClick = { showAttendeeList.value = false }) {
+                                            Text("Close", fontWeight = FontWeight.Bold, color = Color(0xFFB00020))
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+
 
                     if(e.attendees.isNotEmpty()) {
                         Spacer(modifier = Modifier.height(16.dp))
@@ -510,7 +640,7 @@ fun HostCard(name: String, isBusiness: Boolean, imageUri: Uri?, color: Color = C
         .padding(16.dp)
         .height(100.dp)
         .clickable { // navigate to their profile
-             }
+        }
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
