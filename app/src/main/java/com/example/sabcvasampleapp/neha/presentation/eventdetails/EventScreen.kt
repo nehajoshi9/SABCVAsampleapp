@@ -2,7 +2,9 @@
 
 package com.example.sabcvasampleapp.neha.presentation.eventdetails
 
+import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -48,9 +50,49 @@ fun EventScreen(navController: NavController, eventId: String) {
     val repository = Repository
     val event: EventDetails? by viewModel.event.collectAsState()
 
+    val showFilePreview = remember { mutableStateOf(false) }
+    val selectedFileUriState = remember { mutableStateOf<Uri?>(null) }
+
     LaunchedEffect(eventId) {
         viewModel.loadEvent(eventId)
     }
+
+    if (showFilePreview.value && selectedFileUriState.value != null) {
+        ModalBottomSheet(
+            onDismissRequest = { showFilePreview.value = false },
+            sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+            ) {
+                Text("Attachment", fontWeight = FontWeight.Bold, fontSize = 18.sp)
+                Spacer(Modifier.height(8.dp))
+                Text("Tap below to open the attached file.")
+
+                Spacer(Modifier.height(16.dp))
+                Button(onClick = {
+                    val uri = selectedFileUriState.value
+                    if (uri != null) {
+                        val intent = Intent(Intent.ACTION_VIEW).apply {
+                            setDataAndType(uri, context.contentResolver.getType(uri))
+                            flags = Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_ACTIVITY_NEW_TASK
+                        }
+                        context.startActivity(intent)
+                    }
+                }) {
+                    Text("Open File")
+                }
+
+                Spacer(Modifier.height(8.dp))
+                TextButton(onClick = { showFilePreview.value = false }) {
+                    Text("Close")
+                }
+            }
+        }
+    }
+
 
     event?.let { e ->
         Column(modifier = Modifier
@@ -65,9 +107,9 @@ fun EventScreen(navController: NavController, eventId: String) {
                     .background(fallbackGradient)
             ) {
 
-                if (e.image != null) {
+                if (e.fileUri != null) {
                 Image(
-                    rememberAsyncImagePainter(model = e.image),
+                    rememberAsyncImagePainter(model = e.fileUri),
                     contentDescription = null,
                     contentScale = ContentScale.Crop,
                     modifier = Modifier
@@ -251,7 +293,17 @@ fun EventScreen(navController: NavController, eventId: String) {
                             "RSVP'd" else "RSVP Now", fontSize = 16.sp, color = Color.White)
                     }
 
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    if(!e.hasImageFile && e.fileUri != null) {
+                        Text("Attachment", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                        Spacer(modifier = Modifier.height(4.dp))
+                        FilePreview(e.fileUri, context) {
+                            selectedFileUriState.value = e.fileUri
+                            showFilePreview.value = true
+                        }
+                        Spacer(modifier = Modifier.height(8.dp))
+                    }
 
                     var commentText by remember { mutableStateOf("") }
 
@@ -485,6 +537,31 @@ fun TagSection(tags: List<String>, navController: NavController) {
                     )
                 }
             }
+        }
+    }
+}
+
+@Composable
+fun FilePreview(uri: Uri?, context: Context, onClick: () -> Unit) {
+    if (uri == null) return
+
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp)
+            .clickable {
+                onClick()
+            },
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFFF5F5F5))
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.padding(12.dp)
+        ) {
+            Icon(Icons.Default.Description, contentDescription = null)
+            Spacer(Modifier.width(8.dp))
+            Text("Attached file", fontSize = 14.sp)
         }
     }
 }

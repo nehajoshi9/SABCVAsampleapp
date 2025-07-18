@@ -21,7 +21,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -220,13 +219,14 @@ fun EventCard(
                     .background(fallbackGradient)
             ) {
 
-                if (event.image != null) {
+                if (event.hasImageFile) {
                     Image(
-                        rememberAsyncImagePainter(model = event.image),
+                        rememberAsyncImagePainter(model = event.fileUri),
                         contentDescription = null,
                         contentScale = ContentScale.Crop,
                         modifier = Modifier
                             .fillMaxWidth()
+                            .height(125.dp)
                             .clip(RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp))
                     )
                 }

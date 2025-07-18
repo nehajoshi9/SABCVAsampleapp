@@ -207,8 +207,8 @@ object Repository {
         }
     }
 
-    fun addEvent(title: String, startDate: Date, endDate: Date, location: String, description: String, hosts: List<String>, image: Uri? = null, sponsors: List<String> = listOf(), tags: List<String> = listOf()) {
-        allEvents.add(EventDetails(UUID.randomUUID().toString(), title, startDate, endDate, location, description, listOf(), hosts, listOf(), image, sponsors, tags))
+    fun addEvent(title: String, startDate: Date, endDate: Date, location: String, description: String, hosts: List<String>, image: Uri? = null, sponsors: List<String> = listOf(), tags: List<String> = listOf(), isImage: Boolean = false) {
+        allEvents.add(EventDetails(UUID.randomUUID().toString(), title, startDate, endDate, location, description, listOf(), hosts, listOf(), image, sponsors, tags, isImage))
     }
 
    /* fun removeEvent(eventId: String) {

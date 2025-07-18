@@ -21,7 +21,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
-import androidx.compose.material.icons.outlined.AddCircleOutline
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -57,8 +56,8 @@ fun CreateEventScreen(navController: NavController, viewModel: CreateEventViewMo
     val startTime by viewModel.startTime.collectAsState()
     val endTime by viewModel.endTime.collectAsState()
     val eventLocation by viewModel.location.collectAsState()
-    val invitedCoHosts by viewModel.cohosts.collectAsState()
-    val invitedSponsors by viewModel.sponsors.collectAsState()
+    val hosts by viewModel.cohosts.collectAsState()
+    val sponsors by viewModel.sponsors.collectAsState()
     val selectedFileUri by viewModel.fileUri.collectAsState()
     val showDialog by viewModel.showDialog.collectAsState()
     val tags by viewModel.tags.collectAsState()
@@ -88,10 +87,10 @@ fun CreateEventScreen(navController: NavController, viewModel: CreateEventViewMo
         }
     }
     val cohostSuggestions = Repository.allProfiles.filter {
-        it.contains(coHostQuery, ignoreCase = true) && !invitedCoHosts.contains(it)
+        it.contains(coHostQuery, ignoreCase = true) && !hosts.contains(it)
     }
     val sponsorSuggestions = Repository.allBusinessProfiles.filter {
-        it.contains(sponsorQuery, ignoreCase = true) && !invitedSponsors.contains(it)
+        it.contains(sponsorQuery, ignoreCase = true) && !sponsors.contains(it)
     }
 
     val tagSuggestions = Repository.tagUsageMap.keys.filter {
@@ -180,8 +179,13 @@ fun CreateEventScreen(navController: NavController, viewModel: CreateEventViewMo
                                     endTimeCal.get(Calendar.MILLISECOND)
                                 )
 
-                                Log.d("DEBUG", "Start time: ${startTime}")
-                                Log.d("DEBUG", "End time: ${endTime}")
+                                //Log.d("DEBUG", "Start time: ${startTime}")
+                                //Log.d("DEBUG", "End time: ${endTime}")
+
+                                val mimeType = selectedFileUri?.let {
+                                    context.contentResolver.getType(it)
+                                }
+                                val isImage = mimeType?.startsWith("image/") == true
 
                                 Repository.addEvent(
                                     eventTitle,
@@ -189,10 +193,10 @@ fun CreateEventScreen(navController: NavController, viewModel: CreateEventViewMo
                                     endDateCal.time,
                                     eventLocation,
                                     eventDescription,
-                                    invitedCoHosts,
+                                    hosts,
                                     selectedFileUri,
-                                    invitedSponsors,
-                                    tags
+                                    sponsors,
+                                    tags, isImage
                                 )
                                 navController.navigate("calendar")
                                 // Publish
@@ -433,7 +437,7 @@ fun CreateEventScreen(navController: NavController, viewModel: CreateEventViewMo
                 }
 
                 FlowRow(modifier = Modifier.padding(top = 8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    invitedCoHosts.forEach { name ->
+                    hosts.forEach { name ->
                         Surface(
                             color = Color(0xFFE0E0E0),
                             shape = RoundedCornerShape(50),
@@ -502,7 +506,7 @@ fun CreateEventScreen(navController: NavController, viewModel: CreateEventViewMo
                 }
 
                 FlowRow(modifier = Modifier.padding(top = 8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    invitedSponsors.forEach { name ->
+                    sponsors.forEach { name ->
                         Surface(
                             color = Color(0xFFE0E0E0),
                             shape = RoundedCornerShape(50),
