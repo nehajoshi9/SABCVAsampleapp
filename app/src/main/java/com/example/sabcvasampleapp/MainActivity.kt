@@ -6,39 +6,18 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.Surface
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Scaffold
 import androidx.compose.ui.Modifier
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
-import com.example.sabcvasampleapp.presentation.calendar.CalendarScreen
-import com.example.sabcvasampleapp.presentation.eventpage.EventScreen
-import com.example.sabcvasampleapp.presentation.createevent.CreateEventScreen
-import com.example.sabcvasampleapp.ui.theme.SABCVASampleAppTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            SABCVASampleAppTheme {
-                val navController = rememberNavController()
-                Surface(modifier = Modifier.fillMaxSize()) {
-                    NavHost(navController = navController, startDestination = "create_event") {
-                        composable("calendar") {
-                            CalendarScreen(navController)
-                        }
-                        composable("event/{eventId}") { backStackEntry ->
-                            val eventId = requireNotNull(backStackEntry.arguments?.getString("eventId")) {
-                                "Missing eventId in navigation route"
-                            }
-                            EventScreen(navController, eventId)
-                        }
-                        composable("create_event") {
-                            CreateEventScreen(navController)
-                        }
-                    }
-
+            SABCVAAppTheme {
+                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+                    CreateAnnouncementScreen(modifier = Modifier.padding(innerPadding))
                 }
             }
         }
