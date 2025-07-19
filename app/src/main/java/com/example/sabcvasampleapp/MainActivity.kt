@@ -20,6 +20,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -41,6 +43,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.OutlinedTextField
@@ -48,6 +51,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -71,25 +75,27 @@ import com.example.sabcvasampleapp.presentation.calendar.CalendarScreen
 import com.example.sabcvasampleapp.presentation.eventpage.EventScreen
 import com.example.sabcvasampleapp.presentation.createevent.CreateEventScreen
 import com.example.sabcvasampleapp.ui.theme.SABCVASampleAppTheme
+import com.google.firebase.Firebase
+import com.google.firebase.FirebaseApp
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            SABCVASampleAppTheme {
-                CommunityScreen()
+            val viewModel: comViewModel = viewModel()
+            val posts = viewModel.posts
+            Surface(modifier = Modifier.fillMaxSize()) {
+                CommunityScreen(posts = posts)
+                    }
+                }
             }
         }
-    }
-}
 
 @Composable
-fun CommunityScreen(viewModel: comViewModel = viewModel ()) {
+fun CommunityScreen(posts: List<Post>) {
     val selectedFilter = remember { mutableStateOf("All") }
     val showDialog = remember { mutableStateOf(false) }
 
-    val posts = viewModel.getFilteredPosts()
-    val selectedFilter = viewModel.selectedFilter
 
     Box(modifier = Modifier.fillMaxSize()) {
         Column(
@@ -103,11 +109,12 @@ fun CommunityScreen(viewModel: comViewModel = viewModel ()) {
             FilterChips(selectedFilter.value) { selectedFilter.value = it }
             CreatePostSection(onClick = { showDialog.value = true })
 
-            AnnouncementCard()
-            EventCard()
-            NewsletterCard()
-            SponsoredCard()
+            posts.forEach { post ->
+                PostCard(post = post)
+            }
         }
+
+
 
         Box(modifier = Modifier.align(Alignment.BottomCenter)) {
             BottomNavigationBar()
@@ -191,7 +198,6 @@ fun FilterChips(selected: String, onSelect: (String) -> Unit) {
         }
     }
 }
-
 @Composable
 fun CreatePostSection(onClick: () -> Unit) {
     Row(
@@ -209,73 +215,7 @@ fun CreatePostSection(onClick: () -> Unit) {
     }
 }
 
-@Composable
-fun AnnouncementCard() {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp),
-        elevation = CardDefaults.cardElevation(4.dp),
-        shape = RoundedCornerShape(12.dp)
-    ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                CircleAvatar("SA")
-                Spacer(modifier = Modifier.width(8.dp))
-                Column {
-                    Text("SABC Admin", fontWeight = FontWeight.Bold)
-                    Text("Network Director • SABC Business Network")
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text("2h ago", fontSize = 12.sp, color = Color.Gray)
-                        Spacer(modifier = Modifier.width(6.dp))
-                        Box(
-                            modifier = Modifier
-                                .background(Color(0xFFFFF4D6), RoundedCornerShape(8.dp))
-                                .padding(horizontal = 3.dp, vertical = 2.dp)
-                        ) {
-                            Text("Announcement", fontSize = 10.sp, color = Color(0xFFB68B00))
-                        }
-                    }
-                }
-            }
 
-            Row(modifier = Modifier
-                .fillMaxWidth()
-                .height(120.dp)
-                .padding(top = 15.dp)
-            ){
-                //Image(
-                  //  painter = painterResource(id = R.drawable.),
-                  //  contentDescription = stringResource(id = R.string.maintMess),
-                  //  modifier = Modifier.fillMaxSize(),
-                  //  contentScale = ContentScale.Crop
-               // )
-            }
-
-            Spacer(modifier = Modifier.height(8.dp))
-            Text("System Maintenance Notice", fontWeight = FontWeight.Bold)
-            Text(
-                "Our platform will be undergoing scheduled maintenance this Saturday from 2AM to 5AM. Some features may be temporarily unavailable during this time.",
-                fontSize = 14.sp
-            )
-            Text(
-                "Read more",
-                color = Color.Red,
-                fontWeight = FontWeight.Bold,
-                fontSize = 14.sp
-            )
-
-            Spacer(modifier = Modifier.height(12.dp))
-            Row {
-                IconWithText(Icons.Default.ThumbUp, "24")
-                Spacer(modifier = Modifier.width(16.dp))
-                //IconWithText(Icons.Default.ChatBubble, "5")
-                Spacer(modifier = Modifier.width(16.dp))
-                IconWithText(Icons.Default.Share, "Share")
-            }
-        }
-    }
-}
 
 @Composable
 fun CircleAvatar(initials: String) {
@@ -290,14 +230,7 @@ fun CircleAvatar(initials: String) {
     }
 }
 
-@Composable
-fun IconWithText(icon: ImageVector, text: String) {
-    Row(verticalAlignment = Alignment.CenterVertically) {
-        Icon(icon, contentDescription = null, tint = Color.Gray)
-        Spacer(modifier = Modifier.width(4.dp))
-        Text(text, fontSize = 14.sp)
-    }
-}
+
 
 @Composable
 fun BottomNavigationBar() {
@@ -315,173 +248,6 @@ fun BottomNavigationBar() {
     }
 }
 
-@Composable
-fun EventCard() {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp),
-        shape = RoundedCornerShape(12.dp)
-    ) {
-        Column(modifier = Modifier.background(Color.White)) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(Color(0xFF6A1B9A))
-                    .padding(16.dp)
-            ) {
-                Column {
-                    Text("Annual Business Conference 2023", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp)
-                    Text("📍 Grand Convention Center", color = Color.White.copy(alpha = 0.8f), fontSize = 12.sp)
-                }
-                Box(
-                    modifier = Modifier
-                        .align(Alignment.TopEnd)
-                        .background(Color(0xFF9575CD), shape = RoundedCornerShape(8.dp))
-                        .padding(6.dp)
-                ) {
-                    Text("SEP\n15", color = Color.White, fontSize = 12.sp, fontWeight = FontWeight.Bold)
-                }
-            }
-            Column(modifier = Modifier.padding(16.dp)) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    CircleAvatar("EV")
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Column {
-                        Text("Events Team", fontWeight = FontWeight.Bold)
-                        Text("Events Coordinator • SABC Business Network")
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text("3 days ago", fontSize = 12.sp, color = Color.Gray)
-                            Spacer(modifier = Modifier.width(6.dp))
-                            Box(
-                                modifier = Modifier
-                                    .background(Color(0xFFD1C4E9), RoundedCornerShape(8.dp))
-                                    .padding(horizontal = 6.dp, vertical = 2.dp)
-                            ) {
-                                Text("Event", fontSize = 10.sp, color = Color(0xFF512DA8))
-                            }
-                        }
-                    }
-                }
-                Spacer(modifier = Modifier.height(8.dp))
-                Text("Join us for our annual business conference featuring keynote speakers, networking opportunities, and workshops.")
-                Text("Read more", color = Color.Red, fontWeight = FontWeight.Bold)
-                Spacer(modifier = Modifier.height(12.dp))
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    //Icon(Icons.Default.Event, contentDescription = null, tint = Color.Gray)
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Column {
-                        Text("September 15, 2023", fontWeight = FontWeight.Bold)
-                        Text("9:00 AM - 5:00 PM")
-                    }
-                    Spacer(modifier = Modifier.weight(1f))
-                    Button(onClick = { }) {
-                        Text("RSVP")
-                    }
-                }
-                Spacer(modifier = Modifier.height(12.dp))
-                Row {
-                    IconWithText(Icons.Default.ThumbUp, "36")
-                    Spacer(modifier = Modifier.width(16.dp))
-                    //IconWithText(Icons.Default.ChatBubble, "14")
-                    Spacer(modifier = Modifier.width(16.dp))
-                    IconWithText(Icons.Default.Share, "Share")
-                }
-            }
-        }
-    }
-}
 
-@Composable
-fun NewsletterCard() {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp),
-        shape = RoundedCornerShape(12.dp)
-    ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                CircleAvatar("JD")
-                Spacer(modifier = Modifier.width(8.dp))
-                Column {
-                    Text("John Doe", fontWeight = FontWeight.Bold)
-                    Text("Research Analyst • Global Market Insights")
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text("Yesterday", fontSize = 12.sp, color = Color.Gray)
-                        Spacer(modifier = Modifier.width(6.dp))
-                        Box(
-                            modifier = Modifier
-                                .background(Color(0xFFFFF4D6), RoundedCornerShape(8.dp))
-                                .padding(horizontal = 6.dp, vertical = 2.dp)
-                        ) {
-                            Text("Newsletter", fontSize = 10.sp, color = Color(0xFFB68B00))
-                        }
-                    }
-                }
-            }
-            Spacer(modifier = Modifier.height(8.dp))
-            Text("Quarterly Business Report Released", fontWeight = FontWeight.Bold)
-            Text("The Q2 business report has been published. Overall growth exceeded expectations with a 15% increase in network engagement.")
-            Text("Read more", color = Color.Red, fontWeight = FontWeight.Bold)
-            Spacer(modifier = Modifier.height(12.dp))
-            Button(onClick = { }) {
-                //Icon(Icons.Default.FilePresent, contentDescription = null, tint = Color.White)
-                Spacer(modifier = Modifier.width(8.dp))
-                Text("Q2_Business_Report.pdf")
-            }
-            Spacer(modifier = Modifier.height(12.dp))
-            Row {
-                IconWithText(Icons.Default.ThumbUp, "42")
-                Spacer(modifier = Modifier.width(16.dp))
-                // IconWithText(Icons.Default.ChatBubble, "12")
-                Spacer(modifier = Modifier.width(16.dp))
-                IconWithText(Icons.Default.Share, "Share")
-            }
-        }
-    }
-}
-
-@Composable
-fun SponsoredCard() {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp),
-        shape = RoundedCornerShape(12.dp)
-    ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                CircleAvatar("FT")
-                Spacer(modifier = Modifier.width(8.dp))
-                Column {
-                    Text("FinTech Solutions", fontWeight = FontWeight.Bold)
-                    Text("Marketing Director • FinTech Solutions Inc.")
-                    Text("Sponsored", fontSize = 12.sp, color = Color.Gray)
-                }
-            }
-            Spacer(modifier = Modifier.height(8.dp))
-            Text("Streamline Your Business Payments", fontWeight = FontWeight.Bold)
-            Text("Introducing our new payment processing solution designed for small to medium businesses.")
-            Text("Read more", color = Color.Red, fontWeight = FontWeight.Bold)
-            Spacer(modifier = Modifier.height(12.dp))
-            Button(onClick = { }) {
-                Text("Limited time offer: 30-day free trial")
-            }
-            Spacer(modifier = Modifier.height(8.dp))
-            Button(onClick = { }) {
-                Text("Learn More")
-            }
-            Spacer(modifier = Modifier.height(12.dp))
-            Row {
-                IconWithText(Icons.Default.ThumbUp, "18")
-                Spacer(modifier = Modifier.width(16.dp))
-                // IconWithText(Icons.Default.ChatBubble, "3")
-                Spacer(modifier = Modifier.width(16.dp))
-                IconWithText(Icons.Default.Share, "Share")
-            }
-        }
-    }
-}
 
 

@@ -1,9 +1,9 @@
 package com.example.sabcvasampleapp
 
 data class Post(
-    val poster:String= "",
+    val name:String= "",
+    val role: String = "",
     val business: String = "",
-    val postTag: String = "",
     val title: String = "",
     val content: String = ""
 )

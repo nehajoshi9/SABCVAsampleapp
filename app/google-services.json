@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "39251137967",
+    "project_id": "sabcva-data",
+    "storage_bucket": "sabcva-data.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:39251137967:android:ce28aa19eee44d25470b5a",
+        "android_client_info": {
+          "package_name": "com.example.sabcvasampleapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBtlNbq4e9O0Y69rHYF74UTHBIgtox9VCg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
