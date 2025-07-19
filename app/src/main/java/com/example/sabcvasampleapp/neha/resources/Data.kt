@@ -30,102 +30,6 @@ object Data {
             id = "P_${UUID.randomUUID()}",
             name = "Eva Patel",
             email = "eva.patel@example.com"
-        ), createPersonProfile(
-            id = "P_${UUID.randomUUID()}",
-            name = "Alice Johnson",
-            email = "alice.johnson@example.com"
-        ),
-        createPersonProfile(
-            id = "P_${UUID.randomUUID()}",
-            name = "Bob Smith",
-            email = "bob.smith@example.com"
-        ),
-        createPersonProfile(
-            id = "P_${UUID.randomUUID()}",
-            name = "Carmen Reyes",
-            email = "carmen.reyes@example.com"
-        ),
-        createPersonProfile(
-            id = "P_${UUID.randomUUID()}",
-            name = "David Chen",
-            email = "david.chen@example.com"
-        ),
-        createPersonProfile(
-            id = "P_${UUID.randomUUID()}",
-            name = "Eva Patel",
-            email = "eva.patel@example.com"
-        ), createPersonProfile(
-            id = "P_${UUID.randomUUID()}",
-            name = "Alice Johnson",
-            email = "alice.johnson@example.com"
-        ),
-        createPersonProfile(
-            id = "P_${UUID.randomUUID()}",
-            name = "Bob Smith",
-            email = "bob.smith@example.com"
-        ),
-        createPersonProfile(
-            id = "P_${UUID.randomUUID()}",
-            name = "Carmen Reyes",
-            email = "carmen.reyes@example.com"
-        ),
-        createPersonProfile(
-            id = "P_${UUID.randomUUID()}",
-            name = "David Chen",
-            email = "david.chen@example.com"
-        ),
-        createPersonProfile(
-            id = "P_${UUID.randomUUID()}",
-            name = "Eva Patel",
-            email = "eva.patel@example.com"
-        ), createPersonProfile(
-            id = "P_${UUID.randomUUID()}",
-            name = "Alice Johnson",
-            email = "alice.johnson@example.com"
-        ),
-        createPersonProfile(
-            id = "P_${UUID.randomUUID()}",
-            name = "Bob Smith",
-            email = "bob.smith@example.com"
-        ),
-        createPersonProfile(
-            id = "P_${UUID.randomUUID()}",
-            name = "Carmen Reyes",
-            email = "carmen.reyes@example.com"
-        ),
-        createPersonProfile(
-            id = "P_${UUID.randomUUID()}",
-            name = "David Chen",
-            email = "david.chen@example.com"
-        ),
-        createPersonProfile(
-            id = "P_${UUID.randomUUID()}",
-            name = "Eva Patel",
-            email = "eva.patel@example.com"
-        ), createPersonProfile(
-            id = "P_${UUID.randomUUID()}",
-            name = "Alice Johnson",
-            email = "alice.johnson@example.com"
-        ),
-        createPersonProfile(
-            id = "P_${UUID.randomUUID()}",
-            name = "Bob Smith",
-            email = "bob.smith@example.com"
-        ),
-        createPersonProfile(
-            id = "P_${UUID.randomUUID()}",
-            name = "Carmen Reyes",
-            email = "carmen.reyes@example.com"
-        ),
-        createPersonProfile(
-            id = "P_${UUID.randomUUID()}",
-            name = "David Chen",
-            email = "david.chen@example.com"
-        ),
-        createPersonProfile(
-            id = "P_${UUID.randomUUID()}",
-            name = "Eva Patel",
-            email = "eva.patel@example.com"
         )
     )
 
@@ -164,7 +68,7 @@ object Data {
             description = "Learn the latest UI/UX design trends and techniques in this hands-on workshop.",
             attendees = allPersonProfiles
                 .shuffled()
-                .take((6..allPersonProfiles.size).random())
+                .take((0..allPersonProfiles.size).random())
                 .map { it.name }, // take this line out
             comments = listOf(
                 Comment("John Doe", "Looking forward to this event!", 1751992800000),

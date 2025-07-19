@@ -51,6 +51,26 @@ import com.example.sabcvasampleapp.neha.ui.theme.DefaultEventGradients
 import java.lang.Math.abs
 
 
+/**
+ * Composable function that displays the details of a specific event.
+ * It fetches event data using a ViewModel and Repository.
+ *
+ * This screen includes:
+ * - Event image or a fallback gradient background.
+ * - Back and Share buttons.
+ * - Event title.
+ * - Date, time, and location information with options to add to calendar or get directions.
+ * - Event description.
+ * - Attendee list (collapsible and expandable in a dialog).
+ * - Host and Sponsor cards displayed in horizontal scrollable rows.
+ * - Event tags.
+ * - RSVP button that changes based on whether the user has already RSVP'd.
+ * - Attachment preview (if any) that opens the file on click.
+ * - Comment section with an input field to add new comments and a list of existing comments.
+ *
+ * @param navController The NavController used for navigation actions (e.g., going back, navigating to tag search).
+ * @param eventId The unique identifier of the event to be displayed.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EventScreen(navController: NavController, eventId: String) {
@@ -322,30 +342,34 @@ fun EventScreen(navController: NavController, eventId: String) {
                                 Column(modifier = Modifier.padding(20.dp)) {
                                     // Title
                                     Text(
-                                        text = "All Attendees",
+                                        text = "All Attendees (${e.attendees.size} Total)",
                                         fontSize = 18.sp,
                                         fontWeight = FontWeight.Bold
                                     )
 
-                                    Spacer(modifier = Modifier.height(16.dp))
+                                    Spacer(modifier = Modifier.height(4.dp))
 
                                     // Scrollable list in a box with fading overlay
                                     Box(
                                         modifier = Modifier
                                             .fillMaxWidth()
+                                            .padding(8.dp)
                                             .heightIn(max = 250.dp)
                                     ) {
                                         Column(
                                             modifier = Modifier
                                                 .verticalScroll(scrollState)
                                                 .fillMaxWidth()
+
                                         ) {
                                             e.attendees.forEachIndexed { index, name ->
                                                 Row(
                                                     verticalAlignment = Alignment.CenterVertically,
                                                     modifier = Modifier
                                                         .fillMaxWidth()
-                                                        .padding(vertical = 6.dp)
+                                                    .background(color = Color.White)
+                                                    .clickable {  }
+                                                    .padding(6.dp)
                                                 ) {
                                                     Box(
                                                         modifier = Modifier
@@ -375,10 +399,11 @@ fun EventScreen(navController: NavController, eventId: String) {
                                         }
 
                                         // White gradient overlay at bottom (only fades if not at end)
+                                        if(scrollState.value < scrollState.maxValue) {
                                         Box(
                                             modifier = Modifier
                                                 .fillMaxWidth()
-                                                .height(100.dp)
+                                                .height(70.dp)
                                                 .align(Alignment.BottomCenter)
                                                 .background(
                                                     brush = Brush.verticalGradient(
@@ -388,10 +413,8 @@ fun EventScreen(navController: NavController, eventId: String) {
                                                         )
                                                     )
                                                 )
-                                        )
+                                        )}
                                     }
-
-                                    Spacer(modifier = Modifier.height(16.dp))
 
                                     // Close button bottom right
                                     Row(
