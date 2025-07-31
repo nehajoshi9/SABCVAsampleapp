@@ -3,6 +3,7 @@ package com.example.sabcvasampleapp
 
 import android.R.style.Theme
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -10,6 +11,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -41,11 +43,13 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -62,6 +66,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -82,20 +87,49 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
+            val navController = rememberNavController()
             val viewModel: comViewModel = viewModel()
-            val posts = viewModel.posts
-            Surface(modifier = Modifier.fillMaxSize()) {
-                CommunityScreen(posts = posts)
-                    }
+
+            NavHost(navController, startDestination = "community") {
+                composable("community") {
+                    CommunityScreen(
+                        posts = viewModel.posts,
+                        onNavigateToCreatePost = {
+                            navController.navigate("createPost")
+                        }
+                    )
+                }
+
+                composable("createPost") {
+                    CreatePostScreen(
+                        onPost = { newPost ->
+                            viewModel.addPost(newPost)
+                            navController.popBackStack()
+                        },
+                        onCancel = {
+                            navController.popBackStack()
+                        }
+                    )
                 }
             }
         }
+    }
+}
 
 @Composable
-fun CommunityScreen(posts: List<Post>) {
+fun CommunityScreen(
+    posts: List<Post>,
+    onNavigateToCreatePost: () -> Unit
+) {
     val selectedFilter = remember { mutableStateOf("All") }
-    val showDialog = remember { mutableStateOf(false) }
 
+    val filteredPosts = remember(selectedFilter.value, posts) {
+        if (selectedFilter.value == "All") {
+            posts
+        } else {
+            posts.filter { it.tag.equals(selectedFilter.value, ignoreCase = true) }
+        }
+    }
 
     Box(modifier = Modifier.fillMaxSize()) {
         Column(
@@ -105,23 +139,17 @@ fun CommunityScreen(posts: List<Post>) {
                 .background(Color(0xFFF5F5F7))
                 .padding(bottom = 80.dp)
         ) {
-            TopBar(onPostClick = { showDialog.value = true })
-            FilterChips(selectedFilter.value) { selectedFilter.value = it }
-            CreatePostSection(onClick = { showDialog.value = true })
+            TopBar(onPostClick = onNavigateToCreatePost)
+            FilterChips(selected = selectedFilter.value) { selectedFilter.value = it }
+            CreatePostSection(onClick = onNavigateToCreatePost)
 
-            posts.forEach { post ->
+            filteredPosts.forEach { post ->
                 PostCard(post = post)
             }
         }
 
-
-
         Box(modifier = Modifier.align(Alignment.BottomCenter)) {
             BottomNavigationBar()
-        }
-
-        if (showDialog.value) {
-            PostDialog(onDismiss = { showDialog.value = false })
         }
     }
 }
@@ -150,34 +178,6 @@ fun TopBar(onPostClick: () -> Unit) {
             Icon(Icons.Default.Edit, contentDescription = "Post")
         }
     }
-}
-
-@Composable
-fun PostDialog(onDismiss: () -> Unit) {
-    var text by remember { mutableStateOf("") }
-
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text("Create a Post") },
-        text = {
-            OutlinedTextField(
-                value = text,
-                onValueChange = { text = it },
-                placeholder = { Text("What would you like to share?") },
-                modifier = Modifier.fillMaxWidth()
-            )
-        },
-        confirmButton = {
-            TextButton(onClick = onDismiss) {
-                Text("Post")
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text("Cancel")
-            }
-        }
-    )
 }
 
 @Composable
@@ -215,8 +215,6 @@ fun CreatePostSection(onClick: () -> Unit) {
     }
 }
 
-
-
 @Composable
 fun CircleAvatar(initials: String) {
     Box(
@@ -229,8 +227,6 @@ fun CircleAvatar(initials: String) {
         Text(initials, color = Color.White, fontWeight = FontWeight.Bold)
     }
 }
-
-
 
 @Composable
 fun BottomNavigationBar() {
@@ -247,6 +243,175 @@ fun BottomNavigationBar() {
         NavigationBarItem(icon = { Icon(Icons.Default.Person, null) }, label = { Text("Profile") }, selected = false, onClick = {})
     }
 }
+
+@Composable
+fun PostCard(post: Post) {
+    Card(
+        modifier = Modifier
+            .padding(16.dp)
+            .fillMaxWidth(),
+        elevation = CardDefaults.cardElevation(8.dp)
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text("${post.name} • ${post.role} @ ${post.business}", style = MaterialTheme.typography.bodyMedium)
+            Spacer(Modifier.height(8.dp))
+            Text(post.title, style = MaterialTheme.typography.titleMedium)
+
+            // Tag badge
+            Box(
+                modifier = Modifier
+                    .padding(top = 4.dp, bottom = 8.dp)
+                    .background(
+                        color = when (post.tag) {
+                            "Announcement" -> Color(0xFF1976D2) // Blue
+                            "Event" -> Color(0xFF388E3C)        // Green
+                            "Tweet" -> Color(0xFFD32F2F)        // Red
+                            else -> Color.Gray
+                        },
+                        shape = RoundedCornerShape(12.dp)
+                    )
+                    .padding(horizontal = 8.dp, vertical = 4.dp)
+            ) {
+                Text(
+                    text = post.tag,
+                    color = Color.White,
+                    fontSize = 12.sp
+                )
+            }
+
+            Text(post.content, style = MaterialTheme.typography.bodySmall)
+        }
+    }
+}
+
+
+@Composable
+fun CreatePostScreen(
+    onPost: (Post) -> Unit,
+    onCancel: () -> Unit
+) {
+    val context = LocalContext.current
+
+    var name by remember { mutableStateOf("") }
+    var role by remember { mutableStateOf("") }
+    var business by remember { mutableStateOf("") }
+    var title by remember { mutableStateOf("") }
+    var content by remember { mutableStateOf("") }
+    var selectedTag by remember { mutableStateOf("") }
+
+    val tagOptions = listOf("Announcement", "Event", "Tweet")
+
+    val isFormValid = name.isNotBlank() &&
+            role.isNotBlank() &&
+            business.isNotBlank() &&
+            title.isNotBlank() &&
+            content.isNotBlank() &&
+            selectedTag.isNotBlank()
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp)
+            .verticalScroll(rememberScrollState())
+    ) {
+        Text("Create New Post", fontSize = 24.sp, fontWeight = FontWeight.Bold)
+        Spacer(modifier = Modifier.height(16.dp))
+
+        OutlinedTextField(
+            value = name,
+            onValueChange = { name = it },
+            label = { Text("Your Name") },
+            modifier = Modifier.fillMaxWidth()
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+
+        OutlinedTextField(
+            value = role,
+            onValueChange = { role = it },
+            label = { Text("Your Role") },
+            modifier = Modifier.fillMaxWidth()
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+
+        OutlinedTextField(
+            value = business,
+            onValueChange = { business = it },
+            label = { Text("Your Business") },
+            modifier = Modifier.fillMaxWidth()
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+
+        OutlinedTextField(
+            value = title,
+            onValueChange = { title = it },
+            label = { Text("Post Title") },
+            modifier = Modifier.fillMaxWidth()
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+
+        OutlinedTextField(
+            value = content,
+            onValueChange = { content = it },
+            label = { Text("What would you like to share?") },
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(150.dp)
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Text("Select Post Type", fontWeight = FontWeight.SemiBold)
+        Spacer(Modifier.height(8.dp))
+
+        Row(modifier = Modifier.horizontalScroll(rememberScrollState())) {
+            tagOptions.forEach { tag ->
+                FilterChip(
+                    selected = selectedTag == tag,
+                    onClick = { selectedTag = tag },
+                    label = { Text(tag) },
+                    modifier = Modifier.padding(end = 8.dp),
+                    colors = when (tag) {
+                        "Announcement" -> FilterChipDefaults.filterChipColors(containerColor = Color(0xFFBBDEFB))
+                        "Event" -> FilterChipDefaults.filterChipColors(containerColor = Color(0xFFC8E6C9))
+                        "Tweet" -> FilterChipDefaults.filterChipColors(containerColor = Color(0xFFFFCDD2))
+                        else -> FilterChipDefaults.filterChipColors()
+                    }
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Button(
+                onClick = {
+                    if (isFormValid) {
+                        onPost(
+                            Post(
+                                name = name,
+                                role = role,
+                                business = business,
+                                title = title,
+                                content = content,
+                                tag = selectedTag
+                            )
+                        )
+                    } else {
+                        Toast.makeText(context, "Please fill in all fields", Toast.LENGTH_SHORT).show()
+                    }
+                },
+                enabled = isFormValid
+            ) {
+                Text("Post")
+            }
+
+            OutlinedButton(onClick = onCancel) {
+                Text("Cancel")
+            }
+        }
+    }
+}
+
+
 
 
 

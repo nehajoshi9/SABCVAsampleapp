@@ -32,7 +32,22 @@ class comViewModel : ViewModel() {
                 }
             }
     }
+
+    fun addPost(post: Post) {
+        db.collection("posts")
+            .add(post)
+            .addOnSuccessListener {
+                _posts.add(post) // add locally so UI updates
+            }
+            .addOnFailureListener {
+                Log.e("PostError", "Failed to add post", it)
+            }
+    }
 }
+
+
+
+
 
 
 

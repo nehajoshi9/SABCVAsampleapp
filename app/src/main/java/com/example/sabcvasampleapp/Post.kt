@@ -5,5 +5,7 @@ data class Post(
     val role: String = "",
     val business: String = "",
     val title: String = "",
-    val content: String = ""
+    val content: String = "",
+    val tag: String = "",
+    val timestamp: Long = System.currentTimeMillis()
 )
